@@ -13,11 +13,17 @@ public:
     Updater(const QString &manifestUrl);
     ~Updater();
 
-    bool checkForUpdates(const QString &oldVersion);
+    QString latestVersion() const;
+    bool checkForUpdates(const QString &oldVersion) const;
     void fetchManifest();
+    void install();
 
 signals:
     void fetchManifestComplete();
+
+    void installProgress(int progress, const QString &msg = nullptr);
+    void subtaskSetup(bool enabled, int max = 100);
+    void subtaskProgress(int progress, const QString &msg = nullptr);
 
 private:
     QString manifestUrl;

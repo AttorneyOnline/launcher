@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets
+QT       += core gui widgets network
 
 TARGET = launcher
 TEMPLATE = app
@@ -27,18 +27,24 @@ SOURCES += \
         mainwindow.cpp \
         options.cpp \
     updater.cpp \
-    runtimeerror.cpp
+    runtimeerror.cpp \
+    installnotice.cpp \
+    installprogress.cpp
 
 HEADERS += \
         mainwindow.h \
         options.h \
     updater.h \
     runtimeerror.h \
-    task.h
+    task.h \
+    installnotice.h \
+    installprogress.h
 
 FORMS += \
         mainwindow.ui \
-        options.ui
+        options.ui \
+    installnotice.ui \
+    installprogress.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -11,9 +11,9 @@ Options::Options(QWidget *parent) :
     ui->setupUi(this);
 
     QSettings settings;
-    ui->tbInstallPath->setText(settings.value("path").value<QString>());
-    ui->tbProgramRepo->setText(settings.value("repos/program").value<QString>());
-    ui->tbAssetRepo->setText(settings.value("repos/assets").value<QString>());
+    ui->tbInstallPath->setText(settings.value("path").toString());
+    ui->tbProgramRepo->setText(settings.value("repos/program").toString());
+    ui->tbAssetRepo->setText(settings.value("repos/assets").toString());
     ui->cbCheckForUpdatesOnLaunch->setCheckState(settings.value("checkOnLaunch", Qt::CheckState::Checked).value<Qt::CheckState>());
 }
 
