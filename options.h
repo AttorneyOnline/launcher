@@ -2,6 +2,7 @@
 #define OPTIONS_H
 
 #include <QDialog>
+#include <QSettings>
 
 namespace Ui {
 class Options;
@@ -14,6 +15,11 @@ class Options : public QDialog
 public:
     explicit Options(QWidget *parent = nullptr);
     ~Options();
+
+    static const std::map<const QString, const QVariant> defaultOptions;
+
+    template <class T>
+    static T getOption (QSettings &settings, const QString &option);
 
 private:
     Ui::Options *ui;

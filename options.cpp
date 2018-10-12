@@ -5,6 +5,18 @@
 #include <QSettings>
 #include <QtDebug>
 
+const std::map<const QString, const QVariant> Options::defaultOptions = {
+    {"path", QApplication::applicationDirPath()},
+    {"repos/program", "https://assets.aceattorneyonline.com/program_${os}.json"},
+    {"repos/assets", "https://assets.aceattorneyonline.com/assets.json"},
+    {"checkOnLaunch", Qt::CheckState::Checked},
+};
+
+template <class T>
+T Options::getOption(QSettings &settings, const QString &option) {
+    return settings.value(option, defaultOptions.at(option)).value<T>();
+}
+
 Options::Options(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Options) {
@@ -12,9 +24,16 @@ Options::Options(QWidget *parent) :
 
     QSettings settings;
     ui->tbInstallPath->setText(settings.value("path").toString());
+    // ui->tbInstallPath->setPlaceholderText(defaultOptions.at("path").toString());
+
     ui->tbProgramRepo->setText(settings.value("repos/program").toString());
+    ui->tbProgramRepo->setPlaceholderText(defaultOptions.at("repos/program").toString());
+
     ui->tbAssetRepo->setText(settings.value("repos/assets").toString());
-    ui->cbCheckForUpdatesOnLaunch->setCheckState(settings.value("checkOnLaunch", Qt::CheckState::Checked).value<Qt::CheckState>());
+    ui->tbAssetRepo->setPlaceholderText(defaultOptions.at("repos/assets").toString());
+
+    ui->cbCheckForUpdatesOnLaunch->setCheckState(settings.value("checkOnLaunch", Qt::CheckState::Checked)
+                                                 .value<Qt::CheckState>());
 }
 
 Options::~Options() {
@@ -30,10 +49,17 @@ void Options::on_btnBrowseInstallPath_clicked() {
 
 void Options::accept() {
     QSettings settings;
-    settings.setValue("path", ui->tbInstallPath->text());
-    settings.setValue("repos/program", ui->tbProgramRepo->text());
-    settings.setValue("repos/assets", ui->tbAssetRepo->text());
-    settings.setValue("checkOnLaunch", ui->cbCheckForUpdatesOnLaunch->checkState());
+    const std::map<QString, QVariant> options = {
+        {"path", ui->tbInstallPath->text()},
+        {"repos/program", ui->tbProgramRepo->text()},
+        {"repos/assets", ui->tbAssetRepo->text()},
+        {"checkOnLaunch", ui->cbCheckForUpdatesOnLaunch->checkState()}
+    };
+    for (const auto &option : options) {
+        if (option.second != "") {
+            settings.setValue(option.first, option.second);
+        }
+    }
     qDebug() << "Wrote settings to file";
     done(QDialog::Accepted);
 }
