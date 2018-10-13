@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "installnotice.h"
+#include "installprogress.h"
 #include "options.h"
 #include "runtimeerror.h"
 #include "task.h"
@@ -28,6 +30,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+QString MainWindow::getVersionFilePath(const QSettings &settings)
+{
+    // TODO: not DRY
+    // Used only in Updater::setCurrentVersion()
+    const auto installPath = QDir(settings.value("path", QApplication::applicationDirPath()).toString());
+    const auto versionFilePath = installPath.absoluteFilePath("version.ini");
+    return versionFilePath;
 }
 
 void MainWindow::refresh() {
@@ -63,21 +74,31 @@ void MainWindow::play() {
 
 void MainWindow::install() {
     qDebug() << "Install button clicked";
-    ui->stackedWidget->setCurrentWidget(ui->pageInstallProgress);
+    // ui->stackedWidget->setCurrentWidget(ui->pageInstallProgress);
+    if (ui->stackedWidget->currentWidget() == ui->pageNoInstallFound) {
+        InstallNotice notice(this);
+        if (!notice.exec()) {
+            return;
+        }
+    }
+
+    InstallProgress progress(this);
+    progress.show();
+
+    // TODO: iterate through packages that need installation/update
 }
 
 void MainWindow::checkForUpdates(bool manual) {
     const QSettings settings;
-    const std::vector<QString> repos = {"program", "assets"};
 
     try {
-        for (const QString &repo : repos) {
-            Updater updater(settings.value("repos/" + repo).toString());
+        for (const QString &package : packages) {
+            Updater updater(settings.value("repos/" + package).toString(), package);
 
             updater.fetchManifest();
 
             const QSettings versionInfo(versionFilePath, QSettings::Format::IniFormat);
-            const QString curVersion = versionInfo.value(repo + "/version").toString();
+            const QString curVersion = versionInfo.value(package + "/version").toString();
 
             if (updater.checkForUpdates(curVersion)) {
                 const QString newVersion = updater.latestVersion();
