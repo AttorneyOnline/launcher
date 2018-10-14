@@ -6,15 +6,29 @@
 #include <QtDebug>
 
 const std::map<const QString, const QVariant> Options::defaultOptions = {
-    {"path", QApplication::applicationDirPath()},
-    {"repos/program", "https://assets.aceattorneyonline.com/program_${os}.json"},
+    {"path", "."},
+    {"repos/program", "https://assets.aceattorneyonline.com/program_${os}_${arch}.json"},
     {"repos/assets", "https://assets.aceattorneyonline.com/assets.json"},
     {"checkOnLaunch", Qt::CheckState::Checked},
 };
 
-template <class T>
-T Options::getOption(QSettings &settings, const QString &option) {
+template <typename T>
+const T Options::getOption(const QSettings &settings, const QString &option) {
     return settings.value(option, defaultOptions.at(option)).value<T>();
+}
+
+template const QString Options::getOption<QString>(const QSettings &settings, const QString &option);
+
+const QString Options::getRepositoryUrl(const QSettings &settings, const QString &repo) {
+    auto repoUrl = getOption<QString>(settings, "repos/" + repo);
+
+    // OSes of interest: winnt, darwin, linux
+    repoUrl.replace("${os}", QSysInfo::kernelType());
+
+    // Architectures of interest: i386, x86_64
+    repoUrl.replace("${arch}", QSysInfo::currentCpuArchitecture());
+
+    return repoUrl;
 }
 
 Options::Options(QWidget *parent) :
@@ -56,7 +70,9 @@ void Options::accept() {
         {"checkOnLaunch", ui->cbCheckForUpdatesOnLaunch->checkState()}
     };
     for (const auto &option : options) {
-        if (option.second != "") {
+        if (option.second == "") {
+            settings.remove(option.first);
+        } else {
             settings.setValue(option.first, option.second);
         }
     }

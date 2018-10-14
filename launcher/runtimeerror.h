@@ -7,11 +7,11 @@
 class RuntimeError : public QException
 {
 public:
-    RuntimeError(const QString &msg);
+    RuntimeError(const QString msg);
     const char *what() const noexcept;
 
 private:
-    const char *data;
+    std::string data;
 };
 
 #endif // RUNTIMEERROR_H

@@ -2,12 +2,16 @@
 #include "ui_installnotice.h"
 
 #include <QScrollBar>
+#include <QDebug>
+#include <QTimer>
 
 InstallNotice::InstallNotice(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::InstallNotice) {
     ui->setupUi(this);
-    enableAcceptButton();
+    connect(ui->textBrowser->verticalScrollBar(), &QAbstractSlider::valueChanged,
+            this, &InstallNotice::enableAcceptButton);
+    QTimer::singleShot(50, this, &InstallNotice::enableAcceptButton);
 }
 
 InstallNotice::~InstallNotice() {

@@ -4,6 +4,7 @@
 #include "installnotice.h"
 #include "installprogress.h"
 #include "options.h"
+#include "options.h"
 #include "runtimeerror.h"
 #include "task.h"
 #include "updater.h"
@@ -26,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow) {
     ui->setupUi(this);
+    refresh();
 }
 
 MainWindow::~MainWindow() {
@@ -43,7 +45,7 @@ QString MainWindow::getVersionFilePath(const QSettings &settings)
 
 void MainWindow::refresh() {
     const QSettings settings;
-    installPath = QDir(settings.value("path", QApplication::applicationDirPath()).toString());
+    installPath = QDir(Options::getOption<QString>(settings, "path"));
     versionFilePath = installPath.absoluteFilePath("version.ini");
 
     bool validVersion = false;
@@ -70,12 +72,33 @@ void MainWindow::refresh() {
 
 void MainWindow::play() {
     qDebug() << "Play button clicked";
+
+    const QSettings versionInfo(versionFilePath, QSettings::Format::IniFormat);
+
+    QProcess game(this);
+    game.setWorkingDirectory(installPath.absolutePath());
+    game.startDetached(versionInfo.value("program/executable").toString());
+
+    if (game.state() != QProcess::NotRunning) {
+        this->close();
+    }
 }
 
 void MainWindow::install() {
     qDebug() << "Install button clicked";
     // ui->stackedWidget->setCurrentWidget(ui->pageInstallProgress);
     if (ui->stackedWidget->currentWidget() == ui->pageNoInstallFound) {
+        if (installPath.entryList(QDir::Filter::NoDotAndDotDot | QDir::Filter::AllEntries)
+                .count() > 0) {
+            if (QMessageBox::question(this, tr("Installing in an Occupied Folder"),
+                                      tr("You are trying to install in a folder that is not "
+                                         "empty! Are you sure you wish to continue?"),
+                                      QMessageBox::Ok | QMessageBox::Cancel)
+                    != QMessageBox::Ok) {
+                return;
+            }
+        }
+
         InstallNotice notice(this);
         if (!notice.exec()) {
             return;
@@ -85,7 +108,35 @@ void MainWindow::install() {
     InstallProgress progress(this);
     progress.show();
 
-    // TODO: iterate through packages that need installation/update
+    const QSettings settings;
+    const QSettings versionInfo(versionFilePath, QSettings::Format::IniFormat);
+
+    try {
+        for (const QString &package : packages) {
+            const auto manifestUrl = Options::getRepositoryUrl(settings, package);
+            progress.installProgress(0, tr("Fetching manifest from %1").arg(manifestUrl));
+
+            Updater updater(manifestUrl, package);
+
+            connect(&updater, &Updater::installProgress,
+                    &progress, &InstallProgress::installProgress);
+            connect(&updater, &Updater::subtaskSetup,
+                    &progress, &InstallProgress::subtaskSetup);
+            connect(&updater, &Updater::subtaskProgress,
+                    &progress, &InstallProgress::subtaskProgress);
+
+            updater.fetchManifest();
+
+            progress.setWindowTitle(tr("Installing %1 (%2)…").arg(package, updater.latestVersion()));
+            updater.install(versionInfo.value(package + "/version").toString());
+        }
+    } catch (const QException &e) {
+        QMessageBox::critical(this, tr("Installation Error"), e.what());
+    }
+
+    progress.close();
+
+    refresh();
 }
 
 void MainWindow::checkForUpdates(bool manual) {
@@ -93,7 +144,7 @@ void MainWindow::checkForUpdates(bool manual) {
 
     try {
         for (const QString &package : packages) {
-            Updater updater(settings.value("repos/" + package).toString(), package);
+            Updater updater(Options::getRepositoryUrl(settings, package), package);
 
             updater.fetchManifest();
 

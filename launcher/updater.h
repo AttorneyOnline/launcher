@@ -1,6 +1,7 @@
 #ifndef UPDATER_H
 #define UPDATER_H
 
+#include <QDir>
 #include <QJsonObject>
 #include <QObject>
 #include <QString>
@@ -42,9 +43,9 @@ private:
 
     void performTask(const QJsonObject &task);
 
-    void taskDownload(const QString &url);
-    void taskDelete(const QString &target);
-    void taskDeleteDir(const QString &target);
+    void taskDownload(QDir &installDir, const QUrl &url, const QString &hash);
+    void taskDelete(QDir &installDir, const QString &target);
+    void taskDeleteDir(QDir &installDir, const QString &target);
 
     void setCurrentVersion(const QJsonObject &version);
 };

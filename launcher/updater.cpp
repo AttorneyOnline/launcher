@@ -1,11 +1,15 @@
 #include "mainwindow.h"
 #include "runtimeerror.h"
+#include "options.h"
 #include "updater.h"
+
+#include <QArchive>
 
 #include <QLockFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
+#include <QDir>
 #include <QEventLoop>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -82,7 +86,7 @@ void Updater::fetchManifest() {
      */
     {
         QEventLoop eventLoop;
-        connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+        connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
         // TODO: add timer
         eventLoop.exec();
     }
@@ -157,11 +161,11 @@ void Updater::install(const QString &curVersion) {
 
     // Find out what needs to be downloaded.
     if (latestVersion() == curVersion) {
-        throw RuntimeError(tr("Already up-to-date - nothing needs to be done."));
+        qDebug() << "Already up-to-date - nothing needs to be done";
     }
 
     const auto latestVersion = manifest["versions"].toArray()[0].toObject();
-    if (curVersion == nullptr) {
+    if (curVersion == nullptr || curVersion.isEmpty()) {
         // Full install
         qDebug() << "No current version specified - assuming full install";
         fullInstall(latestVersion);
@@ -252,16 +256,20 @@ void Updater::update(const QJsonObject &version, const QString &fromVersion) {
 }
 
 void Updater::performTask(const QJsonObject &task) {
+    const QSettings settings;
+    QDir dir(Options::getOption<QString>(settings, "path"));
+
     const QString action = task["action"].toString();
     if (action == "dl") {
         const QString url = task["url"].toString();
-        taskDownload(url);
+        const QString hash = task["hash"].toString();
+        taskDownload(dir, QUrl(url), hash);
     } else if (action == "delete") {
         const QString target = task["target"].toString();
-        taskDelete(target);
+        taskDelete(dir, target);
     } else if (action == "deleteDir") {
         const QString target = task["target"].toString();
-        taskDeleteDir(target);
+        taskDeleteDir(dir, target);
     } else {
         qWarning() << "Unknown task: " << action;
     }
@@ -270,27 +278,129 @@ void Updater::performTask(const QJsonObject &task) {
     emit installProgress(getInstallProgress());
 }
 
-void Updater::taskDownload(const QString &url) {
+void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &hash) {
     emit subtaskSetup(true);
-    emit subtaskProgress(0, tr("Downloading %1").arg(url));
+    emit subtaskProgress(0, tr("Downloading %1").arg(url.toDisplayString()));
 
-    // TODO: download and unzip file to installation directory
-    // Check SHA-1 checksum of file
+    qDebug() << "dl " << url;
+
+    // TODO: if hash is correct and download already exists, then skip download
+
+    // Create download directory
+    installDir.mkpath("download");
+    installDir.cd("download");
+
+    // Create file within the download directory
+    const QString filename = installDir.filePath(url.fileName());
+    QFile file(filename);
+
+    bool skipDownload = false;
+    if (file.exists()) {
+        // Skip download if hash is correct
+        if (!file.open(QIODevice::ReadOnly)) {
+            throw RuntimeError(tr("Could not read download file: %1")
+                               .arg(file.errorString()));
+        }
+
+        if (!hash.isEmpty()) {
+            QCryptographicHash sha1(QCryptographicHash::Sha1);
+            sha1.addData(&file);
+            if (sha1.result().toHex() == hash) {
+                skipDownload = true;
+            }
+        }
+    }
+
+    if (!skipDownload) {
+        // Open file for writing
+        if (!file.open(QIODevice::WriteOnly)) {
+            throw RuntimeError(tr("Could not create download file: %1")
+                               .arg(file.errorString()));
+        }
+
+        // Perform HTTP GET request
+        QNetworkRequest request(url);
+        request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
+
+        QNetworkAccessManager http;
+        QNetworkReply *reply = http.get(request);
+
+        {
+            QEventLoop eventLoop;
+            connect(reply, &QNetworkReply::downloadProgress, [&](qint64 bytesReceived, qint64 bytesTotal) {
+                if (bytesTotal > 0) {
+                    emit subtaskProgress(static_cast<int>(bytesReceived / bytesTotal * 100.));
+                }
+            });
+            connect(reply, &QNetworkReply::readyRead, [&]() {
+                file.write(reply->readAll());
+            });
+            connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+            // TODO: add timer in case the download stalls
+            eventLoop.exec();
+        }
+
+        file.flush();
+        file.seek(0);
+
+        emit subtaskProgress(100, tr("Calculating checksum of %1").arg(url.toDisplayString()));
+
+        // Calculate SHA-1 checksum of file
+        if (!hash.isEmpty()) {
+            QCryptographicHash sha1(QCryptographicHash::Sha1);
+            sha1.addData(&file);
+            if (sha1.result().toHex() != hash) {
+                throw RuntimeError(tr("Checksum of file %1 was invalid.")
+                                   .arg(url.toDisplayString()));
+            }
+        }
+    }
+
+    file.close();
+
+    emit subtaskProgress(100, tr("Extracting %1").arg(file.fileName()));
+
+    // TODO: unzip files to temp directory first and then move them to install directory
+    installDir.cdUp();
+    QArchive::Extractor(filename, installDir.path())
+            .setFunc([&](short errorCode, QString errorMessage) {
+        Q_UNUSED(errorCode);
+        throw RuntimeError(tr("Unable to extract archive: %1").arg(errorMessage));
+    }).start().waitForFinished();
 }
 
-void Updater::taskDelete(const QString &target) {
+void Updater::taskDelete(QDir &installDir, const QString &target) {
     emit subtaskSetup(true);
     emit subtaskProgress(100, tr("Deleting file %1").arg(target));
 
-    // TODO: delete single file WITHIN the installation directory!
+    qDebug() << "delete " << target;
+
+    // Delete single file only if it is within the installation directory
+    QFileInfo fileInfo(installDir.filePath(target));
+
+    if (!fileInfo.canonicalFilePath().startsWith(installDir.canonicalPath())) {
+        qWarning() << target << ": ignoring invalid path!";
+    } else {
+        QFile::remove(target);
+    }
 }
 
-void Updater::taskDeleteDir(const QString &target) {
+void Updater::taskDeleteDir(QDir &installDir, const QString &target) {
     emit subtaskSetup(true);
     emit subtaskProgress(100, tr("Deleting directory %1").arg(target));
 
-    // TODO: delete directory and all of its contents recursively
-    // WITHIN the installation directory!
+    qDebug() << "deleteDir " << target;
+
+    // Delete directory and all of its contents recursively
+    // only if it is within the installation directory
+    QDir dir(installDir.filePath(target));
+
+    if (!dir.canonicalPath().startsWith(installDir.canonicalPath())
+            || dir.canonicalPath() == installDir.canonicalPath()) {
+        qWarning() << target << ": ignoring invalid path!";
+    } else {
+        dir.removeRecursively();
+    }
 }
 
 void Updater::setCurrentVersion(const QJsonObject &version) {

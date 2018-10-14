@@ -18,9 +18,10 @@ public:
 
     static const std::map<const QString, const QVariant> defaultOptions;
 
-    template <class T>
-    static T getOption (QSettings &settings, const QString &option);
+    template <typename T>
+    static const T getOption (const QSettings &settings, const QString &option);
 
+    static const QString getRepositoryUrl (const QSettings &settings, const QString &repo);
 private:
     Ui::Options *ui;
 

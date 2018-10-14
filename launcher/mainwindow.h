@@ -28,7 +28,6 @@ private:
     QString versionFilePath;
 
     const std::vector<QString> packages = {"program", "assets"};
-    std::map<QString, Updater> updaters;
 
     void refresh();
 
