@@ -1,0 +1,14 @@
+{
+    "versions": [
+        {
+            "version": "classic",
+            "full": [
+                {
+                    "action": "dl",
+                    "url": "https://s3.wasabisys.com/ao-downloads/base-classic.7z",
+                    "hash": "5795aa3c6c88f1aebdf5221d6eacb71105fb440e"
+                }
+            ]
+        }
+    ]
+}

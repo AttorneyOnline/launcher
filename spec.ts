@@ -23,7 +23,7 @@ interface Version {
     update?: Task[];
 }
 
-type Task = DownloadTask | DeleteTask;
+type Task = DownloadTask | DeleteTask | NoticeTask;
 
 interface DownloadTask {
     action: "dl";
@@ -43,4 +43,9 @@ interface DeleteTask {
      * escape the install directory!
      */
     targets: string[];
+}
+
+interface NoticeTask {
+    action: "notice";
+    msg: string;
 }

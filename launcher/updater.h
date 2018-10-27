@@ -36,7 +36,9 @@ private:
     int totalTasks = 0;
     int completedTasks = 0;
 
-    int getInstallProgress() const { return static_cast<int>(completedTasks / totalTasks * 100.); }
+    int getInstallProgress() const {
+        return static_cast<int>(completedTasks / static_cast<double>(totalTasks) * 100);
+    }
 
     void fullInstall(const QJsonObject &version);
     void update(const QJsonObject &version, const QString &fromVersion);
@@ -46,6 +48,7 @@ private:
     void taskDownload(QDir &installDir, const QUrl &url, const QString &hash);
     void taskDelete(QDir &installDir, const QString &target);
     void taskDeleteDir(QDir &installDir, const QString &target);
+    void taskNotice(const QString &msg);
 
     void setCurrentVersion(const QJsonObject &version);
 };

@@ -330,6 +330,9 @@ background-color: qlineargradient(spread:pad, x1:1, y1:1, x2:1, y2:0, stop:0 rgb
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Installed version: %s&lt;/p&gt;&lt;p&gt; &lt;a href=&quot;#check_updates&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Check for updates&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
+          <property name="textFormat">
+           <enum>Qt::RichText</enum>
+          </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>

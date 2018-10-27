@@ -76,6 +76,6 @@ void Options::accept() {
             settings.setValue(option.first, option.second);
         }
     }
-    qDebug() << "Wrote settings to file";
+    qDebug() << "Wrote settings to" << settings.fileName();
     done(QDialog::Accepted);
 }

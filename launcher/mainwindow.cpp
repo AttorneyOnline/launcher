@@ -22,6 +22,7 @@
 #include <QtDebug>
 #include <QException>
 #include <QJsonArray>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -40,26 +41,40 @@ QString MainWindow::getVersionFilePath(const QSettings &settings)
     // Used only in Updater::setCurrentVersion()
     const auto installPath = QDir(settings.value("path", QApplication::applicationDirPath()).toString());
     const auto versionFilePath = installPath.absoluteFilePath("version.ini");
+
+    qDebug() << "Version file path:" << versionFilePath;
+
     return versionFilePath;
 }
 
 void MainWindow::refresh() {
     const QSettings settings;
     installPath = QDir(Options::getOption<QString>(settings, "path"));
-    versionFilePath = installPath.absoluteFilePath("version.ini");
+    versionFilePath = getVersionFilePath(settings);
 
     bool validVersion = false;
     const QSettings versionInfo(versionFilePath, QSettings::Format::IniFormat);
+
+    // XXX: This is a flimsy check.
     if (versionInfo.value("program/version").toString() != ""
             && versionInfo.value("assets/version").toString() != "") {
-        // XXX: This is a flimsy check.
         validVersion = true;
-        ui->labelInstalledVersion->setText(tr("Installed version: %1")
-                                           .arg(versionInfo.value("program/version").toString()));
+
+        QString installedVersions = "";
+        for (const QString &package : packages) {
+            installedVersions += tr("Installed %1 version: %2<br>")
+                    .arg(package, versionInfo.value(package + "/version").toString());
+        }
+
+        ui->labelInstalledVersion->setText(tr("%1<p>"
+                                              "<a href=\"#refresh\">Check for updates</a>")
+                                           .arg(installedVersions));
+        //ui->labelInstalledVersion->setTextFormat(Qt::RichText);
     }
 
     if (validVersion) {
         ui->stackedWidget->setCurrentWidget(ui->pageReadyToPlay);
+
         const bool checkUpdates = settings.value("checkOnLaunch", Qt::CheckState::Checked)
                 .value<Qt::CheckState>() == Qt::CheckState::Checked;
         if (checkUpdates) {
@@ -76,10 +91,10 @@ void MainWindow::play() {
     const QSettings versionInfo(versionFilePath, QSettings::Format::IniFormat);
 
     QProcess game(this);
-    game.setWorkingDirectory(installPath.absolutePath());
-    game.startDetached(versionInfo.value("program/executable").toString());
-
-    if (game.state() != QProcess::NotRunning) {
+    if (game.startDetached(versionInfo.value("program/executable").toString(), {},
+                           installPath.absolutePath())) {
+        qCritical() << "Error starting game:" << game.errorString();
+    } else {
         this->close();
     }
 }
@@ -131,7 +146,8 @@ void MainWindow::install() {
             updater.install(versionInfo.value(package + "/version").toString());
         }
     } catch (const QException &e) {
-        QMessageBox::critical(this, tr("Installation Error"), e.what());
+        QMessageBox::critical(this, tr("Installation Error"),
+                              tr("%1\n\n%2").arg(e.what(), TROUBLESHOOT_MSG));
     }
 
     progress.close();
@@ -166,12 +182,8 @@ void MainWindow::checkForUpdates(bool manual) {
     } catch (const QException &e) {
         // Do not print an error message if the update check was automatic
         if (!manual) return;
-        QMessageBox::critical(this,
-                              tr("Error Checking Updates"),
-                              tr("%1\n\n"
-                                 "Please ensure that your connection is not blocked by a firewall. "
-                                 "If you modified a repository path, please ensure that it is correct.")
-                              .arg(e.what()));
+        QMessageBox::critical(this, tr("Error Checking Updates"),
+                              tr("%1\n\n%2").arg(e.what(), TROUBLESHOOT_MSG));
     }
 }
 

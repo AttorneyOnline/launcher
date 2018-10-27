@@ -13,6 +13,7 @@
 #include <QEventLoop>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QMessageBox>
 #include <QSettings>
 
 Updater::Updater(const QString &manifestUrl, const QString &repoName)
@@ -50,11 +51,13 @@ bool Updater::checkForUpdates(const QString &curVersion) const {
 }
 
 void Updater::fetchManifest() {
-    qDebug() << "Fetching manifest from " << manifestUrl;
+    qDebug() << "Fetching manifest from" << manifestUrl;
 
     // Craft an HTTP request from path specified in the manifest URL
     QNetworkRequest request(manifestUrl);
     request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute,
+                         QNetworkRequest::NoLessSafeRedirectPolicy);
 
     // Perform HTTP GET request
     QNetworkAccessManager http;
@@ -162,6 +165,7 @@ void Updater::install(const QString &curVersion) {
     // Find out what needs to be downloaded.
     if (latestVersion() == curVersion) {
         qDebug() << "Already up-to-date - nothing needs to be done";
+        return;
     }
 
     const auto latestVersion = manifest["versions"].toArray()[0].toObject();
@@ -191,7 +195,7 @@ void Updater::fullInstall(const QJsonObject &version) {
     const QString prev = version["prev"].toString();
     const QString current = version["version"].toString();
 
-    qDebug() << "Performing full install: " << current;
+    qDebug() << "Performing full install:" << current;
 
     totalTasks += fullInstallTasks.count();
 
@@ -227,7 +231,7 @@ void Updater::update(const QJsonObject &version, const QString &fromVersion) {
     const QString current = version["version"].toString();
     const QString prev = version["prev"].toString();
 
-    qDebug() << "Performing update: " << current;
+    qDebug() << "Performing update:" << current;
 
     totalTasks += updateTasks.count();
 
@@ -242,7 +246,7 @@ void Updater::update(const QJsonObject &version, const QString &fromVersion) {
         update(versions[prev], fromVersion);
     }
 
-    qDebug() << prev << " -> " << current;
+    qDebug() << prev << "->" << current;
 
     // Perform update tasks
     emit installProgress(getInstallProgress(), tr("Updating from %1 to %2…")
@@ -270,8 +274,11 @@ void Updater::performTask(const QJsonObject &task) {
     } else if (action == "deleteDir") {
         const QString target = task["target"].toString();
         taskDeleteDir(dir, target);
+    } else if (action == "notice") {
+        const QString msg = task["msg"].toString();
+        taskNotice(msg);
     } else {
-        qWarning() << "Unknown task: " << action;
+        qWarning() << "Unknown task:" << action;
     }
 
     completedTasks++;
@@ -282,9 +289,7 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
     emit subtaskSetup(true);
     emit subtaskProgress(0, tr("Downloading %1").arg(url.toDisplayString()));
 
-    qDebug() << "dl " << url;
-
-    // TODO: if hash is correct and download already exists, then skip download
+    qDebug() << "task: dl" << url;
 
     // Create download directory
     installDir.mkpath("download");
@@ -307,8 +312,13 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
             sha1.addData(&file);
             if (sha1.result().toHex() == hash) {
                 skipDownload = true;
+            } else {
+                qWarning() << "checksum mismatch: expected" << hash
+                           << "but got" << sha1.result().toHex();
             }
         }
+
+        file.close();
     }
 
     if (!skipDownload) {
@@ -321,6 +331,8 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
         // Perform HTTP GET request
         QNetworkRequest request(url);
         request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
+        request.setAttribute(QNetworkRequest::FollowRedirectsAttribute,
+                             QNetworkRequest::NoLessSafeRedirectPolicy);
 
         QNetworkAccessManager http;
         QNetworkReply *reply = http.get(request);
@@ -329,7 +341,7 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
             QEventLoop eventLoop;
             connect(reply, &QNetworkReply::downloadProgress, [&](qint64 bytesReceived, qint64 bytesTotal) {
                 if (bytesTotal > 0) {
-                    emit subtaskProgress(static_cast<int>(bytesReceived / bytesTotal * 100.));
+                    emit subtaskProgress(static_cast<int>(bytesReceived / static_cast<double>(bytesTotal) * 100));
                 }
             });
             connect(reply, &QNetworkReply::readyRead, [&]() {
@@ -350,6 +362,8 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
             QCryptographicHash sha1(QCryptographicHash::Sha1);
             sha1.addData(&file);
             if (sha1.result().toHex() != hash) {
+                qCritical() << "checksum: expected" << hash
+                            << "but got" << sha1.result().toHex();
                 throw RuntimeError(tr("Checksum of file %1 was invalid.")
                                    .arg(url.toDisplayString()));
             }
@@ -370,10 +384,10 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
 }
 
 void Updater::taskDelete(QDir &installDir, const QString &target) {
-    emit subtaskSetup(true);
-    emit subtaskProgress(100, tr("Deleting file %1").arg(target));
+    emit subtaskSetup(false);
+    // emit subtaskProgress(100, tr("Deleting file %1").arg(target));
 
-    qDebug() << "delete " << target;
+    qDebug() << "task: delete" << target;
 
     // Delete single file only if it is within the installation directory
     QFileInfo fileInfo(installDir.filePath(target));
@@ -386,10 +400,10 @@ void Updater::taskDelete(QDir &installDir, const QString &target) {
 }
 
 void Updater::taskDeleteDir(QDir &installDir, const QString &target) {
-    emit subtaskSetup(true);
-    emit subtaskProgress(100, tr("Deleting directory %1").arg(target));
+    emit subtaskSetup(false);
+    // emit subtaskProgress(100, tr("Deleting directory %1").arg(target));
 
-    qDebug() << "deleteDir " << target;
+    qDebug() << "task: deleteDir" << target;
 
     // Delete directory and all of its contents recursively
     // only if it is within the installation directory
@@ -403,14 +417,22 @@ void Updater::taskDeleteDir(QDir &installDir, const QString &target) {
     }
 }
 
-void Updater::setCurrentVersion(const QJsonObject &version) {
-    qDebug() << "Setting current version to " << version;
+void Updater::taskNotice(const QString &msg)
+{
+    emit subtaskSetup(false);
 
+    QMessageBox::information(nullptr, "Install Notice", msg);
+}
+
+void Updater::setCurrentVersion(const QJsonObject &version) {
     const QString current = version["version"].toString();
     const QString executablePath = version["executable"].toString();
 
+    qDebug() << "Setting current version to" << current;
+
     const QSettings settings;
-    QSettings currentVersionInfo(MainWindow::getVersionFilePath(settings));
+    QSettings currentVersionInfo(MainWindow::getVersionFilePath(settings),
+                                 QSettings::IniFormat);
     currentVersionInfo.setValue(repoName + "/version", current);
 
     if (executablePath != "") {
