@@ -53,10 +53,31 @@ Download URLs must be direct links.
 
 ### Deploying new versions
 
+#### Client
+
 Deploying a new client version will require building for the necessary
 platforms (`winnt_i386`, `linux_x86_64`) and adding version entries to the
 respective manifest files. Ensure that the `prev` entry is set to the previous
 version.
+
+Do not distribute `base/config.ini` or other configuration files in client
+downloads, as this will consistently overwrite player-set settings. Instead,
+distribute a `base/config.sample.ini` file, which explains all of the possible
+settings and their default values and can be renamed to `config.ini` by the
+player.
+
+#### Assets
+
+You should package your assets with the 7z format using LZMA2 solid
+compression, which should yield an extremely high compression ratio compared
+to ZIP.
+
+It is recommended to segment very large downloads into multiple archives. If
+an error occurs, the updater can detect which archives have already been
+downloaded, but only if the hash for each archive has been included in
+the download.
+
+#### Botched deploys
 
 If a mishap (botch) occurs in either an asset or client version, **DO NOT ROLL
 BACK - ROLL FORWARD**. Rolling back will cause the launcher to perform a full
