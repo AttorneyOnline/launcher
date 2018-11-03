@@ -91,7 +91,7 @@ void MainWindow::play() {
     const QSettings versionInfo(versionFilePath, QSettings::Format::IniFormat);
 
     QProcess game(this);
-    QString gamePath = versionInfo.value("program/executable").toString();
+    QString gamePath = installPath.filePath(versionInfo.value("program/executable").toString());
     qDebug() << "Starting" << gamePath;
     if (game.startDetached(gamePath, {}, installPath.absolutePath())) {
         this->close();
