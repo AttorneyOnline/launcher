@@ -299,9 +299,9 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
     const QString filename = installDir.filePath(url.fileName());
     QFile file(filename);
 
+    // Skip download if hash is correct
     bool skipDownload = false;
     if (file.exists()) {
-        // Skip download if hash is correct
         if (!file.open(QIODevice::ReadOnly)) {
             throw RuntimeError(tr("Could not read download file: %1")
                                .arg(file.errorString()));
@@ -322,47 +322,55 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
     }
 
     if (!skipDownload) {
-        QSaveFile saveFile(filename);
-
-        // Open file for writing
-        if (!saveFile.open(QIODevice::WriteOnly)) {
-            throw RuntimeError(tr("Could not create download file: %1")
-                               .arg(saveFile.errorString()));
-        }
-
-        // Perform HTTP GET request
-        QNetworkRequest request(url);
-        request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
-        request.setAttribute(QNetworkRequest::FollowRedirectsAttribute,
-                             QNetworkRequest::NoLessSafeRedirectPolicy);
-
-        QNetworkAccessManager http;
-        QNetworkReply *reply = http.get(request);
-
+        // Download file
         {
-            QEventLoop eventLoop;
-            connect(reply, &QNetworkReply::downloadProgress, [&](qint64 bytesReceived, qint64 bytesTotal) {
-                if (bytesTotal > 0) {
-                    emit subtaskProgress(static_cast<int>(bytesReceived / static_cast<double>(bytesTotal) * 100));
-                }
-            });
-            connect(reply, &QNetworkReply::readyRead, [&]() {
-                saveFile.write(reply->readAll());
-            });
-            connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
-            // TODO: add timer in case the download stalls
-            eventLoop.exec();
+            QSaveFile saveFile(filename);
+
+            // Open file for writing
+            if (!saveFile.open(QIODevice::WriteOnly)) {
+                throw RuntimeError(tr("Could not create download file: %1")
+                                   .arg(saveFile.errorString()));
+            }
+
+            // Perform HTTP GET request
+            QNetworkRequest request(url);
+            request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
+            request.setAttribute(QNetworkRequest::FollowRedirectsAttribute,
+                                 QNetworkRequest::NoLessSafeRedirectPolicy);
+
+            QNetworkAccessManager http;
+            QNetworkReply *reply = http.get(request);
+
+            {
+                QEventLoop eventLoop;
+                connect(reply, &QNetworkReply::downloadProgress, [&](qint64 bytesReceived, qint64 bytesTotal) {
+                    if (bytesTotal > 0) {
+                        emit subtaskProgress(static_cast<int>(bytesReceived / static_cast<double>(bytesTotal) * 100));
+                    }
+                });
+                connect(reply, &QNetworkReply::readyRead, [&]() {
+                    saveFile.write(reply->readAll());
+                });
+                connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+                // TODO: add timer in case the download stalls
+                eventLoop.exec();
+            }
+
+            saveFile.commit();
         }
 
-        saveFile.commit();
-        saveFile.seek(0);
+        // Reopen file to calculate checksum
+        if (!file.open(QIODevice::ReadOnly)) {
+            throw RuntimeError(tr("Could not read downloaded file: %1")
+                               .arg(file.errorString()));
+        }
 
         emit subtaskProgress(100, tr("Calculating checksum of %1").arg(url.toDisplayString()));
 
         // Calculate SHA-1 checksum of file
         if (!hash.isEmpty()) {
             QCryptographicHash sha1(QCryptographicHash::Sha1);
-            sha1.addData(&saveFile);
+            sha1.addData(&file);
             if (sha1.result().toHex() != hash) {
                 qCritical() << "checksum: expected" << hash
                             << "but got" << sha1.result().toHex();
@@ -370,6 +378,8 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
                                    .arg(url.toDisplayString()));
             }
         }
+
+        file.close();
     }
 
     emit subtaskProgress(100, tr("Extracting %1").arg(file.fileName()));
@@ -377,21 +387,22 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
     // TODO: unzip files to temp directory first and then move them to install directory
     installDir.cdUp();
 
-    bool error;
+    bool error = false;
     QString errorMsg;
+    short errorCode;
 
     QArchive::Extractor(filename, installDir.path())
-            .setFunc([&](short errorCode, const QString &file) {
-        Q_UNUSED(errorCode);
+            .setFunc([&](short code, const QString &file) {
         error = true;
         errorMsg = file;
-        qCritical() << "Error extracting" << file << "- code" << errorCode;
+        errorCode = code;
+        qCritical() << "Error extracting" << file << "- code" << code;
     }).setFunc(QArchive::PROGRESS, [&](int progress) {
         emit subtaskProgress(progress);
     }).start().waitForFinished();
 
     if (error) {
-        throw RuntimeError(tr("Unable to extract from archive: %1").arg(errorMsg));
+        throw RuntimeError(tr("Unable to extract from archive: %1 (error code %2)").arg(errorCode).arg(errorMsg));
     }
 }
 

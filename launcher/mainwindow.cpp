@@ -96,7 +96,7 @@ void MainWindow::play() {
     if (game.startDetached(gamePath, {}, installPath.absolutePath())) {
         this->close();
     } else {
-        QMessageBox::critical(this, "Error Starting Game", tr("Error starting game: %1").arg(game.errorString()));
+        QMessageBox::critical(this, "Error Starting Game", tr("Error starting %1: %2").arg(gamePath, game.errorString()));
     }
 }
 
