@@ -5,8 +5,8 @@
             "full": [
                 {
                     "action": "dl",
-                    "url": "https://s3.wasabisys.com/ao-downloads/base-classic.7z",
-                    "hash": "5795aa3c6c88f1aebdf5221d6eacb71105fb440e"
+                    "url": "https://s3.wasabisys.com/ao-downloads/base-classic.zip",
+                    "hash": "22b15c66660c34d007b04eadac3d8344c553ff2a"
                 }
             ]
         }

@@ -91,11 +91,12 @@ void MainWindow::play() {
     const QSettings versionInfo(versionFilePath, QSettings::Format::IniFormat);
 
     QProcess game(this);
-    if (game.startDetached(versionInfo.value("program/executable").toString(), {},
-                           installPath.absolutePath())) {
-        qCritical() << "Error starting game:" << game.errorString();
-    } else {
+    QString gamePath = versionInfo.value("program/executable").toString();
+    qDebug() << "Starting" << gamePath;
+    if (game.startDetached(gamePath, {}, installPath.absolutePath())) {
         this->close();
+    } else {
+        QMessageBox::critical(this, "Error Starting Game", tr("Error starting game: %1").arg(game.errorString()));
     }
 }
 
@@ -103,8 +104,10 @@ void MainWindow::install() {
     qDebug() << "Install button clicked";
     // ui->stackedWidget->setCurrentWidget(ui->pageInstallProgress);
     if (ui->stackedWidget->currentWidget() == ui->pageNoInstallFound) {
-        if (installPath.entryList(QDir::Filter::NoDotAndDotDot | QDir::Filter::AllEntries)
-                .count() > 0) {
+        auto files = installPath.entryList(QDir::Filter::NoDotAndDotDot | QDir::Filter::AllEntries);
+        auto launcherFilename = QFileInfo(QCoreApplication::applicationFilePath()).fileName();
+
+        if (files.count() > 0 && !(files.count() == 1 && files.contains(launcherFilename))) {
             if (QMessageBox::question(this, tr("Installing in an Occupied Folder"),
                                       tr("You are trying to install in a folder that is not "
                                          "empty! Are you sure you wish to continue?"),

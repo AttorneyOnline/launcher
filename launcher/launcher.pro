@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets network
+QT       += core gui widgets network svg
 
 TARGET = launcher
 TEMPLATE = app

@@ -322,10 +322,12 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
     }
 
     if (!skipDownload) {
+        QSaveFile saveFile(filename);
+
         // Open file for writing
-        if (!file.open(QIODevice::WriteOnly)) {
+        if (!saveFile.open(QIODevice::WriteOnly)) {
             throw RuntimeError(tr("Could not create download file: %1")
-                               .arg(file.errorString()));
+                               .arg(saveFile.errorString()));
         }
 
         // Perform HTTP GET request
@@ -345,22 +347,22 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
                 }
             });
             connect(reply, &QNetworkReply::readyRead, [&]() {
-                file.write(reply->readAll());
+                saveFile.write(reply->readAll());
             });
             connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
             // TODO: add timer in case the download stalls
             eventLoop.exec();
         }
 
-        file.flush();
-        file.seek(0);
+        saveFile.commit();
+        saveFile.seek(0);
 
         emit subtaskProgress(100, tr("Calculating checksum of %1").arg(url.toDisplayString()));
 
         // Calculate SHA-1 checksum of file
         if (!hash.isEmpty()) {
             QCryptographicHash sha1(QCryptographicHash::Sha1);
-            sha1.addData(&file);
+            sha1.addData(&saveFile);
             if (sha1.result().toHex() != hash) {
                 qCritical() << "checksum: expected" << hash
                             << "but got" << sha1.result().toHex();
@@ -370,17 +372,27 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
         }
     }
 
-    file.close();
-
     emit subtaskProgress(100, tr("Extracting %1").arg(file.fileName()));
 
     // TODO: unzip files to temp directory first and then move them to install directory
     installDir.cdUp();
+
+    bool error;
+    QString errorMsg;
+
     QArchive::Extractor(filename, installDir.path())
-            .setFunc([&](short errorCode, QString errorMessage) {
+            .setFunc([&](short errorCode, const QString &file) {
         Q_UNUSED(errorCode);
-        throw RuntimeError(tr("Unable to extract archive: %1").arg(errorMessage));
+        error = true;
+        errorMsg = file;
+        qCritical() << "Error extracting" << file << "- code" << errorCode;
+    }).setFunc(QArchive::PROGRESS, [&](int progress) {
+        emit subtaskProgress(progress);
     }).start().waitForFinished();
+
+    if (error) {
+        throw RuntimeError(tr("Unable to extract from archive: %1").arg(errorMsg));
+    }
 }
 
 void Updater::taskDelete(QDir &installDir, const QString &target) {
