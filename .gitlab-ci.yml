@@ -7,6 +7,9 @@ cache:
   paths:
     - lib/
 
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
 before_script:
   - echo Current working directory is $(pwd)
 
@@ -38,7 +41,7 @@ build linux x86_64:
       - bin/
 
 build windows i686:
-  image: ${CI_REGISTRY_IMAGE}/builder-windows-i686
+  image: registry.gitlab.com/attorneyonline/ao2-client/builder-windows-i686
   stage: build
   tags:
     - docker
