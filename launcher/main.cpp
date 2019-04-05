@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Attorney Online");
     QCoreApplication::setOrganizationDomain("aceattorneyonline.com");
     QCoreApplication::setApplicationName("Attorney Online Launcher");
+    QCoreApplication::setApplicationVersion(APP_VERSION);
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,
                        QCoreApplication::applicationDirPath());
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+    w.refresh();
 
     return a.exec();
 }

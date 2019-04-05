@@ -35,6 +35,7 @@ private:
 
     const std::vector<QString> packages = {"program", "assets"};
 
+public slots:
     void refresh();
 
 private slots:

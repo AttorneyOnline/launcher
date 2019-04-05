@@ -31,7 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    refresh();
+    setWindowTitle(tr("Attorney Online Launcher %1")
+                   .arg(QCoreApplication::applicationVersion()));
 }
 
 MainWindow::~MainWindow() {

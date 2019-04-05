@@ -41,7 +41,7 @@ interface Version {
     update?: Task[];
 }
 
-type Task = DownloadTask | DeleteTask | NoticeTask;
+type Task = DownloadTask | DeleteTask | NoticeTask | MoveTask;
 
 interface DownloadTask {
     action: "dl";
@@ -73,4 +73,10 @@ interface NoticeTask {
      * version specified in the manifest).
      */
     versionCheck?: boolean;
+}
+
+interface MoveTask {
+    action: "move";
+    source: string;
+    target: string;
 }
