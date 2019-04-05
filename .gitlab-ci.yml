@@ -1,0 +1,88 @@
+stages:
+  - build
+  - deploy
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - lib/
+
+before_script:
+  - echo Current working directory is $(pwd)
+
+build linux x86_64:
+  image: ubuntu
+  stage: build
+  tags:
+    - docker
+    - linux
+  script:
+    # Install dependencies
+    - apt-get update
+    - >
+      apt-get install --no-install-recommends -y qt5-default qtmultimedia5-dev
+      clang make git sudo curl ca-certificates pkg-config upx unzip
+
+    # Print versions
+    - qmake --version
+    - clang --version
+
+    # Build
+    - qmake -spec linux-clang
+    - make -j4
+
+    # Post-processing
+    - upx --lzma -9 --force bin/launcher
+  artifacts:
+    paths:
+      - bin/
+
+build windows i686:
+  image: ${CI_REGISTRY_IMAGE}/builder-windows-i686
+  stage: build
+  tags:
+    - docker
+    - linux
+  script:
+    # Build
+    - /opt/mxe/usr/${TARGET_SPEC}/qt5/bin/qmake
+    - make -j4
+
+    # Post-processing
+    - upx --lzma -9 --force bin/launcher.exe
+  artifacts:
+    paths:
+      - bin/
+
+deploy linux x86_64:
+  stage: deploy
+  dependencies:
+    - build linux x86_64
+  tags:
+    - docker
+    - linux
+  script:
+    - mkdir artifact
+    - cd artifact
+    - cp -a ../bin/launcher ./launcher_$(git describe --tags)
+    - sha1sum .
+  artifacts:
+    paths:
+      - artifact/
+
+deploy windows i686:
+  image: ubuntu
+  stage: deploy
+  dependencies:
+    - build windows i686
+  tags:
+    - docker
+    - linux
+  script:
+    - mkdir artifact
+    - cd artifact
+    - cp -a ../bin/launcher.exe "./AO Launcher $(git describe --tags)"
+    - sha1sum .
+  artifacts:
+    paths:
+      - artifact/

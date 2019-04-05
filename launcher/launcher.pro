@@ -9,6 +9,8 @@ QT       += core gui widgets network svg
 TARGET = launcher
 TEMPLATE = app
 
+DESTDIR = $$PWD/bin
+
 VERSION = 1.2.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
@@ -28,17 +30,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
-        options.cpp \
+    main.cpp \
+    mainwindow.cpp \
+    options.cpp \
     updater.cpp \
     runtimeerror.cpp \
     installnotice.cpp \
     installprogress.cpp
 
 HEADERS += \
-        mainwindow.h \
-        options.h \
+    mainwindow.h \
+    options.h \
     updater.h \
     runtimeerror.h \
     task.h \
@@ -46,15 +48,10 @@ HEADERS += \
     installprogress.h
 
 FORMS += \
-        mainwindow.ui \
-        options.ui \
+    mainwindow.ui \
+    options.ui \
     installnotice.ui \
     installprogress.ui
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
     resources.qrc
