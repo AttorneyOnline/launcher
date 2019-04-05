@@ -20,6 +20,12 @@ public slots:
     void subtaskSetup(bool enabled, int max = 100);
     void subtaskProgress(int progress, const QString &msg = nullptr);
 
+private slots:
+    void on_btnCancel_clicked();
+
+signals:
+    void cancel();
+
 private:
     Ui::InstallProgress *ui;
 };

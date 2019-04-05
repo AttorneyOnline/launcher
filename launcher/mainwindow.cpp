@@ -23,6 +23,9 @@
 #include <QException>
 #include <QJsonArray>
 #include <QTimer>
+#include <QResource>
+
+extern template const QString Options::getOption<QString>(const QSettings &settings, const QString &option);
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -142,6 +145,8 @@ void MainWindow::install() {
                     &progress, &InstallProgress::subtaskSetup);
             connect(&updater, &Updater::subtaskProgress,
                     &progress, &InstallProgress::subtaskProgress);
+            connect(&progress, &InstallProgress::cancel,
+                    &updater, &Updater::cancel);
 
             updater.fetchManifest();
 
@@ -149,8 +154,12 @@ void MainWindow::install() {
             updater.install(versionInfo.value(package + "/version").toString());
         }
     } catch (const QException &e) {
-        QMessageBox::critical(this, tr("Installation Error"),
-                              tr("%1\n\n%2").arg(e.what(), TROUBLESHOOT_MSG));
+        QMessageBox message(this);
+        message.setIcon(QMessageBox::Critical);
+        message.setWindowTitle(tr("Installation Error"));
+        message.setText(tr("<p>%1<p>%2").arg(e.what()).arg(TROUBLESHOOT_MSG));
+        message.setTextFormat(Qt::TextFormat::RichText);
+        message.exec();
     }
 
     progress.close();
@@ -166,6 +175,13 @@ void MainWindow::checkForUpdates(bool manual) {
             Updater updater(Options::getRepositoryUrl(settings, package), package);
 
             updater.fetchManifest();
+
+            if (updater.hasBranding()) {
+                QResource::unregisterResource(branding, "branding");
+                branding = updater.fetchBranding();
+                QResource::registerResource(branding, "branding");
+                ui->brandingLogo->setPixmap(QPixmap(":logo.png"));
+            }
 
             const QSettings versionInfo(versionFilePath, QSettings::Format::IniFormat);
             const QString curVersion = versionInfo.value(package + "/version").toString();

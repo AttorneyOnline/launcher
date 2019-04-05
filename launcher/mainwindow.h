@@ -22,13 +22,16 @@ public:
     static QString getVersionFilePath(const QSettings &settings);
 
 private:
-    const QString TROUBLESHOOT_MSG = tr("Please ensure that your connection is not blocked by a firewall. "
+    const QString TROUBLESHOOT_MSG = tr("<b>For network errors:</b><br>"
+                                        "Please ensure that your connection is not blocked by a firewall. "
                                         "If you modified a repository path, please ensure that it is correct.");
 
     Ui::MainWindow *ui;
 
     QDir installPath;
     QString versionFilePath;
+
+    QByteArray branding;
 
     const std::vector<QString> packages = {"program", "assets"};
 

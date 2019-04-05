@@ -10,6 +10,7 @@ const std::map<const QString, const QVariant> Options::defaultOptions = {
     {"repos/program", "https://s3.wasabisys.com/ao-manifests/program_${os}_${arch}.json"},
     {"repos/assets", "https://s3.wasabisys.com/ao-manifests/assets.json"},
     {"checkOnLaunch", Qt::CheckState::Checked},
+    {"version", QApplication::applicationVersion()}
 };
 
 template <typename T>

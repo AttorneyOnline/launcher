@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QSettings>
 #include <QDebug>
+#include <QResource>
 
 int main(int argc, char *argv[])
 {
@@ -13,6 +14,7 @@ int main(int argc, char *argv[])
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,
                        QCoreApplication::applicationDirPath());
+    QDir::setSearchPaths("branding", {":/branding", ":/res"});
 
     const QSettings settings;
     qDebug() << "Settings:" << settings.fileName();

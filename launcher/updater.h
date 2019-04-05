@@ -2,9 +2,12 @@
 #define UPDATER_H
 
 #include <QDir>
+#include <QEventLoop>
 #include <QJsonObject>
 #include <QObject>
 #include <QString>
+
+#include <bits/unique_ptr.h>
 
 class Updater : public QObject
 {
@@ -19,12 +22,17 @@ public:
     void fetchManifest();
     void install(const QString &curVersion = nullptr);
 
+    bool hasBranding();
+    QByteArray fetchBranding();
 signals:
     void fetchManifestComplete();
 
     void installProgress(int progress, const QString &msg = nullptr);
     void subtaskSetup(bool enabled, int max = 100);
     void subtaskProgress(int progress, const QString &msg = nullptr);
+
+public slots:
+    void cancel();
 
 private:
     const QString manifestUrl;
@@ -35,6 +43,12 @@ private:
 
     int totalTasks = 0;
     int completedTasks = 0;
+
+    // For long-running tasks only.
+    std::unique_ptr<QEventLoop> eventLoop;
+
+    // Downloaded files to be removed at the end of a transaction
+    std::list<QString> downloadedFiles;
 
     int getInstallProgress() const {
         return static_cast<int>(completedTasks / static_cast<double>(totalTasks) * 100);
@@ -49,6 +63,7 @@ private:
     void taskDelete(QDir &installDir, const QString &target);
     void taskDeleteDir(QDir &installDir, const QString &target);
     void taskNotice(const QString &msg);
+    void taskMove(QDir &installDir, const QString &source, const QString &target);
 
     void setCurrentVersion(const QJsonObject &version);
 };

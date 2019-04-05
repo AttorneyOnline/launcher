@@ -14,7 +14,11 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMessageBox>
+#include <QResource>
+#include <QSaveFile>
 #include <QSettings>
+
+extern template const QString Options::getOption<QString>(const QSettings &settings, const QString &option);
 
 Updater::Updater(const QString &manifestUrl, const QString &repoName)
     : manifestUrl(manifestUrl), repoName(repoName) {
@@ -123,6 +127,49 @@ void Updater::fetchManifest() {
     delete reply;
 
     emit fetchManifestComplete();
+}
+
+bool Updater::hasBranding() {
+    return !manifest["launcher"].toObject()["branding"].toString().isEmpty();
+}
+
+QByteArray Updater::fetchBranding() {
+    QString brandingUrl = manifest["launcher"].toObject()["branding"].toString();
+    qDebug() << "Fetching branding from" << brandingUrl;
+
+    // Craft an HTTP request from path specified in the manifest URL
+    QNetworkRequest request(brandingUrl);
+    request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute,
+                         QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    // Perform HTTP GET request
+    QNetworkAccessManager http;
+    QNetworkReply *reply = http.get(request);
+    {
+        QEventLoop eventLoop;
+        connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+        // TODO: add timer
+        eventLoop.exec();
+    }
+
+    if (reply->error()) {
+        qWarning() << "Network error getting branding:"
+                   << reply->errorString();
+        return QByteArray();
+    }
+
+    // Get resource file data
+    QByteArray data = reply->readAll();
+    delete reply;
+
+    return data;
+}
+
+void Updater::cancel() {
+    if (eventLoop.get() != nullptr) {
+        eventLoop->exit(1);
+    }
 }
 
 void Updater::install(const QString &curVersion) {
@@ -256,6 +303,13 @@ void Updater::update(const QJsonObject &version, const QString &fromVersion) {
         performTask(task.toObject());
     }
 
+    while (!downloadedFiles.empty()) {
+        QString file = downloadedFiles.front();
+        qDebug() << "deleting temp file" << file;
+        QFile::remove(file);
+        downloadedFiles.pop_front();
+    }
+
     setCurrentVersion(version);
 }
 
@@ -276,7 +330,22 @@ void Updater::performTask(const QJsonObject &task) {
         taskDeleteDir(dir, target);
     } else if (action == "notice") {
         const QString msg = task["msg"].toString();
-        taskNotice(msg);
+        const bool versionCheck = task["versionCheck"].toBool();
+        if (versionCheck) {
+            const QString launcherVersion = Options::getOption<QString>(settings, "version");
+            const QString manifestLauncherVersion = manifest["launcher"].toObject()
+                    ["version"].toString();
+            if (versionCheck && !manifestLauncherVersion.isEmpty()
+                    && launcherVersion != manifestLauncherVersion) {
+                taskNotice(msg);
+            }
+        } else {
+            taskNotice(msg);
+        }
+    } else if (action == "move") {
+        const QString source = task["source"].toString();
+        const QString target = task["target"].toString();
+        taskMove(dir, source, target);
     } else {
         qWarning() << "Unknown task:" << action;
     }
@@ -339,21 +408,28 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
                                  QNetworkRequest::NoLessSafeRedirectPolicy);
 
             QNetworkAccessManager http;
-            QNetworkReply *reply = http.get(request);
+            std::unique_ptr<QNetworkReply> reply(http.get(request));
 
             {
-                QEventLoop eventLoop;
-                connect(reply, &QNetworkReply::downloadProgress, [&](qint64 bytesReceived, qint64 bytesTotal) {
+                eventLoop.reset(new QEventLoop());
+                connect(reply.get(), &QNetworkReply::downloadProgress, [&](qint64 bytesReceived, qint64 bytesTotal) {
                     if (bytesTotal > 0) {
                         emit subtaskProgress(static_cast<int>(bytesReceived / static_cast<double>(bytesTotal) * 100));
                     }
                 });
-                connect(reply, &QNetworkReply::readyRead, [&]() {
+                connect(reply.get(), &QNetworkReply::readyRead, [&]() {
                     saveFile.write(reply->readAll());
                 });
-                connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+                connect(reply.get(), &QNetworkReply::finished, eventLoop.get(), &QEventLoop::quit);
+
                 // TODO: add timer in case the download stalls
-                eventLoop.exec();
+
+                int returnCode = eventLoop->exec();
+                eventLoop.release();
+                if (returnCode) {
+                    emit reply->abort();
+                    throw RuntimeError(tr("The installation was canceled by the user."));
+                }
             }
 
             saveFile.commit();
@@ -391,24 +467,52 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
     QString errorMsg;
     short errorCode;
 
-    QArchive::Extractor(filename, installDir.path())
-            .setFunc([&](short code, const QString &file) {
-        error = true;
-        errorMsg = file;
-        errorCode = code;
-        qCritical() << "Error extracting" << file << "- code" << code;
-    }).setFunc(QArchive::PROGRESS, [&](int progress) {
-        emit subtaskProgress(progress);
-    }).start().waitForFinished();
+    {
+        // (Yeah, we're gonna do this crappy trick again...)
+        eventLoop.reset(new QEventLoop());
+        QArchive::DiskExtractor extractor(filename, installDir.path(), this, false);
+        QObject::connect(&extractor, &QArchive::DiskExtractor::error,
+                         [&](short code, const QString &file) {
+            error = true;
+            errorMsg = file;
+            errorCode = code;
+            qCritical() << "Error extracting" << file << "- code" << code;
+            emit eventLoop->quit();
+        });
+        QObject::connect(&extractor, &QArchive::DiskExtractor::progress,
+                         [&](QString file, int filesDone, int totalFiles, int percent) {
+            emit subtaskProgress(percent, tr("[%1/%2] %3")
+                                 .arg(filesDone)
+                                 .arg(totalFiles)
+                                 .arg(file));
+        });
+        QObject::connect(&extractor, &QArchive::DiskExtractor::finished, eventLoop.get(), &QEventLoop::quit);
+
+        extractor.setCalculateProgress(true);
+        extractor.setBlockSize(16384); // 16K blocks
+        extractor.start();
+
+        int returnCode = eventLoop->exec();
+        eventLoop.release();
+        if (returnCode) {
+            extractor.cancel();
+            throw RuntimeError(tr("The installation was canceled by the user."));
+        }
+    }
 
     if (error) {
-        throw RuntimeError(tr("Unable to extract from archive: %1 (error code %2)").arg(errorCode).arg(errorMsg));
+        throw RuntimeError(tr("Unable to extract from archive: %1 (error code %2)")
+                           .arg(errorMsg)
+                           .arg(errorCode));
     }
+
+    // If the extraction was successful, delete the archive later
+    downloadedFiles.push_back(filename);
 }
 
 void Updater::taskDelete(QDir &installDir, const QString &target) {
-    emit subtaskSetup(false);
-    // emit subtaskProgress(100, tr("Deleting file %1").arg(target));
+    emit subtaskSetup(true);
+    emit subtaskProgress(100, tr("Deleting file %1").arg(target));
 
     qDebug() << "task: delete" << target;
 
@@ -423,8 +527,8 @@ void Updater::taskDelete(QDir &installDir, const QString &target) {
 }
 
 void Updater::taskDeleteDir(QDir &installDir, const QString &target) {
-    emit subtaskSetup(false);
-    // emit subtaskProgress(100, tr("Deleting directory %1").arg(target));
+    emit subtaskSetup(true);
+    emit subtaskProgress(100, tr("Deleting directory %1").arg(target));
 
     qDebug() << "task: deleteDir" << target;
 
@@ -444,7 +548,27 @@ void Updater::taskNotice(const QString &msg)
 {
     emit subtaskSetup(false);
 
-    QMessageBox::information(nullptr, "Install Notice", msg);
+    if (QMessageBox::information(nullptr, "Install Notice", msg,
+                                 QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Cancel) {
+        throw RuntimeError(tr("The installation was canceled by the user."));
+    }
+}
+
+void Updater::taskMove(QDir &installDir, const QString &source, const QString &target)
+{
+    emit subtaskSetup(false);
+    emit subtaskProgress(100, tr("Moving %1 to %2").arg(source, target));
+
+    // Move only if source and target are within the installation directory
+    QDir fromDir(installDir.filePath(source));
+    QDir toDir(installDir.filePath(target));
+
+    if (!fromDir.canonicalPath().startsWith(installDir.canonicalPath())
+            || !toDir.canonicalPath().startsWith(installDir.canonicalPath())) {
+        qWarning() << target << ": ignoring invalid path!";
+    } else {
+        installDir.rename(source, target);
+    }
 }
 
 void Updater::setCurrentVersion(const QJsonObject &version) {

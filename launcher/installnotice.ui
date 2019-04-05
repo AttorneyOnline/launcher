@@ -28,7 +28,7 @@
     <widget class="QTextBrowser" name="textBrowser">
      <property name="source">
       <url>
-       <string>qrc:/res/default_install_notice.html</string>
+       <string>qrc:/res/install_notice.html</string>
       </url>
      </property>
      <property name="openExternalLinks">

@@ -8,6 +8,7 @@ QT       += core gui widgets network svg
 
 TARGET = launcher
 TEMPLATE = app
+VERSION = 1.2.0
 
 RC_ICONS = logo.ico
 

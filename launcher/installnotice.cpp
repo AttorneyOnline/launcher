@@ -9,6 +9,7 @@ InstallNotice::InstallNotice(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::InstallNotice) {
     ui->setupUi(this);
+    ui->textBrowser->setSource(QUrl(":install_notice.html"));
     connect(ui->textBrowser->verticalScrollBar(), &QAbstractSlider::valueChanged,
             this, &InstallNotice::enableAcceptButton);
     QTimer::singleShot(4000, this, &InstallNotice::enableAcceptButton);

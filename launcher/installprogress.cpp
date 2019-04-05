@@ -7,6 +7,7 @@ InstallProgress::InstallProgress(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::InstallProgress) {
     ui->setupUi(this);
+    this->setWindowFlag(Qt::WindowCloseButtonHint, false);
     ui->widgetSubtask->hide();
 }
 
@@ -33,4 +34,9 @@ void InstallProgress::subtaskProgress(int progress, const QString &msg) {
         qInfo() << "subtask:" << msg;
         ui->labelSubtask->setText(msg);
     }
+}
+
+void InstallProgress::on_btnCancel_clicked() {
+    qInfo() << "Cancel button clicked";
+    emit cancel();
 }
