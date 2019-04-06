@@ -37,6 +37,7 @@ build linux x86_64:
     - make -j4
 
     # Post-processing
+    - mv launcher/bin .
     - upx --lzma -9 --force bin/launcher
   artifacts:
     paths:
@@ -60,6 +61,7 @@ build windows i686:
     - make -j4 release
 
     # Post-processing
+    - mv launcher/bin .
     - upx --lzma -9 --force bin/launcher.exe
   artifacts:
     paths:

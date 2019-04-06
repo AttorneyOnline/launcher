@@ -59,7 +59,7 @@ RESOURCES += \
 # For QArchive
 QT += concurrent
 
-LIBS += ../libs/QArchive/libQArchive.a -larchive -lbz2 -llzma -llz4 -lz -lzstd -lnettle -lexpat
+LIBS += ../libs/QArchive/libQArchive.a -larchive -lbz2 -llzma -llz4 -lz -lzstd -lnettle -lexpat -lxml2
 win32:LIBS += -lbcrypt -liconv
 
 INCLUDEPATH += ../libs/QArchive ../libs/QArchive/include
