@@ -24,6 +24,7 @@ build linux x86_64:
     - apt-get update
     - >
       apt-get install --no-install-recommends -y qt5-default qtmultimedia5-dev
+      libqt5svg5-dev
       clang make git sudo curl ca-certificates pkg-config upx unzip
       libarchive-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev nettle-dev
       libexpat1-dev libxml2-dev

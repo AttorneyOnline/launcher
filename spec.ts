@@ -60,7 +60,7 @@ interface DeleteTask {
      * NOTE: when implementing, do not attempt to process relative paths that
      * escape the install directory!
      */
-    target: string;
+    target: string | string[];
 }
 
 interface NoticeTask {
