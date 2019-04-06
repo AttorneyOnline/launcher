@@ -51,10 +51,10 @@ build windows i686:
     - linux
   script:
     # Apply last-minute patches
+    - git apply launcher/ci.patch
     - cd libs/QArchive
     - git apply ../QArchive.patch
     - cd ../..
-    - sed -i 's/\.\.\/libs\/QArchive\/libQArchive\.a/\.\.\/libs\/QArchive\/release\/libQArchive\.a/g' launcher/launcher.pro
 
     # Build
     - /opt/mxe/usr/${TARGET_SPEC}/qt5/bin/qmake
