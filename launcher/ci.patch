@@ -2,7 +2,7 @@ diff --git a/launcher/launcher.pro b/launcher/launcher.pro
 index 2484f07..a667141 100644
 --- a/launcher/launcher.pro
 +++ b/launcher/launcher.pro
-@@ -59,7 +59,7 @@ RESOURCES += \
+@@ -59,7 +59,6 @@ RESOURCES += \
  # For QArchive
  QT += concurrent
  
