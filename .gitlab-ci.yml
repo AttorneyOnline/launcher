@@ -76,10 +76,11 @@ deploy linux x86_64:
     - docker
     - linux
   script:
+    - apt-get install git
     - mkdir artifact
     - cd artifact
     - cp -a ../bin/launcher ./launcher_$(git describe --tags)
-    - sha1sum .
+    - sha1sum *
   artifacts:
     paths:
       - artifact/
@@ -93,10 +94,11 @@ deploy windows i686:
     - docker
     - linux
   script:
+    - apt-get install git
     - mkdir artifact
     - cd artifact
     - cp -a ../bin/launcher.exe "./AO Launcher $(git describe --tags)"
-    - sha1sum .
+    - sha1sum *
   artifacts:
     paths:
       - artifact/

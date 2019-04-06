@@ -60,8 +60,8 @@ private:
     void performTask(const QJsonObject &task);
 
     void taskDownload(QDir &installDir, const QUrl &url, const QString &hash);
-    void taskDelete(QDir &installDir, const QString &target);
-    void taskDeleteDir(QDir &installDir, const QString &target);
+    void taskDelete(QDir &installDir, const QStringList &targets);
+    void taskDeleteDir(QDir &installDir, const QStringList &targets);
     void taskNotice(const QString &msg);
     void taskMove(QDir &installDir, const QString &source, const QString &target);
 

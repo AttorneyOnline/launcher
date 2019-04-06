@@ -4,14 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets network
+QT       += core gui widgets network svg
 
 TARGET = launcher
 TEMPLATE = app
 
 DESTDIR = $$PWD/bin
 
-VERSION = 1.2.0
+VERSION = 1.2.1
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 RC_ICONS = logo.ico

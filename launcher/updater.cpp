@@ -329,11 +329,25 @@ void Updater::performTask(const QJsonObject &task) {
         const QString hash = task["hash"].toString();
         taskDownload(dir, QUrl(url), hash);
     } else if (action == "delete") {
-        const QString target = task["target"].toString();
-        taskDelete(dir, target);
+        if (task["target"].isArray()) {
+            QStringList targets;
+            for (const QJsonValue val : task["target"].toArray())
+                targets.append(val.toString());
+
+            taskDelete(dir, targets);
+        } else {
+            taskDelete(dir, {task["target"].toString()});
+        }
     } else if (action == "deleteDir") {
-        const QString target = task["target"].toString();
-        taskDeleteDir(dir, target);
+        if (task["target"].isArray()) {
+            QStringList targets;
+            for (const QJsonValue val : task["target"].toArray())
+                targets.append(val.toString());
+
+            taskDeleteDir(dir, targets);
+        } else {
+            taskDeleteDir(dir, {task["target"].toString()});
+        }
     } else if (action == "notice") {
         const QString msg = task["msg"].toString();
         const bool versionCheck = task["versionCheck"].toBool();
@@ -516,37 +530,55 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
     downloadedFiles.push_back(filename);
 }
 
-void Updater::taskDelete(QDir &installDir, const QString &target) {
+void Updater::taskDelete(QDir &installDir, const QStringList &targets) {
     emit subtaskSetup(true);
-    emit subtaskProgress(100, tr("Deleting file %1").arg(target));
 
-    qDebug() << "task: delete" << target;
+    int completed = 0, total = targets.length();
+    for (const QString &target : targets) {
+        emit subtaskProgress(static_cast<int>(static_cast<double>(completed) / total),
+                             tr("[%1/%2] Deleting file %3")
+                             .arg(completed).arg(total)
+                             .arg(target));
 
-    // Delete single file only if it is within the installation directory
-    QFileInfo fileInfo(installDir.filePath(target));
+        qDebug() << "task: delete" << target;
 
-    if (!fileInfo.canonicalFilePath().startsWith(installDir.canonicalPath())) {
-        qWarning() << target << ": ignoring invalid path!";
-    } else {
-        QFile::remove(target);
+        // Delete single file only if it is within the installation directory
+        QFileInfo fileInfo(installDir.filePath(target));
+
+        if (!fileInfo.canonicalFilePath().startsWith(installDir.canonicalPath())) {
+            qWarning() << target << ": ignoring invalid path!";
+        } else {
+            QFile::remove(target);
+        }
+
+        completed++;
     }
 }
 
-void Updater::taskDeleteDir(QDir &installDir, const QString &target) {
+void Updater::taskDeleteDir(QDir &installDir, const QStringList &targets) {
     emit subtaskSetup(true);
-    emit subtaskProgress(100, tr("Deleting directory %1").arg(target));
 
-    qDebug() << "task: deleteDir" << target;
+    int completed = 0, total = targets.length();
+    for (const QString &target : targets) {
+        emit subtaskProgress(static_cast<int>(static_cast<double>(completed) / total),
+                             tr("[%1/%2] Deleting directory %3")
+                             .arg(completed).arg(total)
+                             .arg(target));
 
-    // Delete directory and all of its contents recursively
-    // only if it is within the installation directory
-    QDir dir(installDir.filePath(target));
+        qDebug() << "task: deleteDir" << target;
 
-    if (!dir.canonicalPath().startsWith(installDir.canonicalPath())
-            || dir.canonicalPath() == installDir.canonicalPath()) {
-        qWarning() << target << ": ignoring invalid path!";
-    } else {
-        dir.removeRecursively();
+        // Delete directory and all of its contents recursively
+        // only if it is within the installation directory
+        QDir dir(installDir.filePath(target));
+
+        if (!dir.canonicalPath().startsWith(installDir.canonicalPath())
+                || dir.canonicalPath() == installDir.canonicalPath()) {
+            qWarning() << target << ": ignoring invalid path!";
+        } else {
+            dir.removeRecursively();
+        }
+
+        completed++;
     }
 }
 
