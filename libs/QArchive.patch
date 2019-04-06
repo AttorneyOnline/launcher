@@ -1,0 +1,25 @@
+diff --git a/QArchive.pro b/QArchive.pro
+index b9f9523..16e9eaa 100644
+--- a/QArchive.pro
++++ b/QArchive.pro
+@@ -5,6 +5,6 @@
+ # -------------------------------
+ include(QArchive.pri)
+ TEMPLATE = lib
+-CONFIG += shared_and_static build_all release
++CONFIG += static release
+ TARGET = QArchive
+ DEFINES += QT_DEPRECATED_WARNINGS
+diff --git a/src/qarchivediskextractor_p.cc b/src/qarchivediskextractor_p.cc
+index 07c37bc..447bc1e 100644
+--- a/src/qarchivediskextractor_p.cc
++++ b/src/qarchivediskextractor_p.cc
+@@ -440,7 +440,7 @@ short DiskExtractorPrivate::checkOutputDirectory()
+     if(!info.isWritable() || !info.isReadable()) {
+         return NoPermissionToWrite;
+     }
+-    m_OutputDirectory = info.absoluteFilePath();
++    m_OutputDirectory = info.absoluteFilePath() + "/";
+     return NoError;
+ }
+ 

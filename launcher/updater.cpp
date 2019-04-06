@@ -270,6 +270,12 @@ void Updater::fullInstall(const QJsonObject &version) {
         setCurrentVersion(version);
     }
 
+    while (!downloadedFiles.empty()) {
+        QString file = downloadedFiles.front();
+        qDebug() << "deleting temp file" << file;
+        QFile::remove(file);
+        downloadedFiles.pop_front();
+    }
 }
 
 void Updater::update(const QJsonObject &version, const QString &fromVersion) {

@@ -25,6 +25,9 @@ build linux x86_64:
     - >
       apt-get install --no-install-recommends -y qt5-default qtmultimedia5-dev
       clang make git sudo curl ca-certificates pkg-config upx unzip
+      libarchive-dev
+      # libbz2-dev lzma-dev liblz4-dev libzstd-dev libnettle6
+      # libexpat1-dev
 
     # Print versions
     - qmake --version
@@ -47,9 +50,14 @@ build windows i686:
     - docker
     - linux
   script:
+    # Apply last-minute patches
+    - cd libs/QArchive
+    - git apply ../QArchive.patch
+    - cd ../..
+
     # Build
     - /opt/mxe/usr/${TARGET_SPEC}/qt5/bin/qmake
-    - make -j4
+    - make -j4 release
 
     # Post-processing
     - upx --lzma -9 --force bin/launcher.exe
