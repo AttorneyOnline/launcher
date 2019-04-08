@@ -355,6 +355,8 @@ void Updater::performTask(const QJsonObject &task) {
             const QString launcherVersion = Options::getOption<QString>(settings, "version");
             const QString manifestLauncherVersion = manifest["launcher"].toObject()
                     ["version"].toString();
+            qDebug() << "Launcher version:" << launcherVersion;
+            qDebug() << "Manifest's launcher version:" << manifestLauncherVersion;
             if (versionCheck && !manifestLauncherVersion.isEmpty()
                     && launcherVersion != manifestLauncherVersion) {
                 taskNotice(msg);
