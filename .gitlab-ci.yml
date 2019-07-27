@@ -39,7 +39,7 @@ build linux x86_64:
 
     # Post-processing
     - mv launcher/bin .
-    - upx --lzma -9 --force bin/launcher
+    - upx -9 --force bin/launcher.exe
   artifacts:
     paths:
       - bin/
@@ -64,7 +64,7 @@ build windows i686:
 
     # Post-processing
     - mv launcher/bin .
-    - upx --lzma -9 --force bin/launcher.exe
+    - upx -9 --force bin/launcher.exe
   artifacts:
     paths:
       - bin/
