@@ -39,7 +39,7 @@ build linux x86_64:
 
     # Post-processing
     - mv launcher/bin .
-    - upx -9 --force bin/launcher.exe
+    - upx -9 --force bin/launcher
   artifacts:
     paths:
       - bin/
