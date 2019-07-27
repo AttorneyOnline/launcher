@@ -87,7 +87,6 @@ deploy linux x86_64:
       - artifact/
 
 deploy windows i686:
-  image: ubuntu
   stage: deploy
   dependencies:
     - build windows i686
