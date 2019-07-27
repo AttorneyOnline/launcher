@@ -1,13 +1,13 @@
 diff --git a/launcher/launcher.pro b/launcher/launcher.pro
-index 2484f07..f7940f2 100644
+index 1f2bf6c..fbd06ad 100644
 --- a/launcher/launcher.pro
 +++ b/launcher/launcher.pro
-@@ -59,7 +59,7 @@ RESOURCES += \
+@@ -59,7 +59,6 @@ RESOURCES += \
  # For QArchive
  QT += concurrent
  
 -LIBS += ../libs/QArchive/libQArchive.a -larchive -lbz2 -llzma -llz4 -lz -lzstd -lnettle -lexpat -lxml2
-+LIBS += ../libs/QArchive/release/libQArchive.a -larchive -lbz2 -llzma -llz4 -lz -lzstd -lnettle -lexpat -lxml2 /opt/mxe/usr/i686-w64-mingw32.static.posix/lib/liblzma.a
- win32:LIBS += -lbcrypt -liconv
+-win32:LIBS += -lbcrypt -liconv
++LIBS += ../libs/QArchive/release/libQArchive.a -larchive -lnettle -lxml2
  
  INCLUDEPATH += ../libs/QArchive ../libs/QArchive/include
