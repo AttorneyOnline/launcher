@@ -550,7 +550,7 @@ void Updater::taskDelete(QDir &installDir, const QStringList &targets) {
         if (!fileInfo.canonicalFilePath().startsWith(installDir.canonicalPath())) {
             qWarning() << target << ": ignoring invalid path!";
         } else {
-            QFile::remove(target);
+            QFile::remove(installDir.filePath(target));
         }
 
         completed++;
