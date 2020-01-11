@@ -14,6 +14,7 @@
 #include <QtNetwork/QSslConfiguration>
 #include <QtNetwork/QNetworkReply>
 
+#include <QCoreApplication>
 #include <QSettings>
 #include <QFile>
 #include <QJsonDocument>
@@ -98,7 +99,7 @@ void MainWindow::play() {
     QString gamePath = installPath.filePath(versionInfo.value("program/executable").toString());
     qDebug() << "Starting" << gamePath;
     if (game.startDetached(gamePath, {}, installPath.absolutePath())) {
-        this->close();
+        QCoreApplication::quit();
     } else {
         QMessageBox::critical(this, "Error Starting Game", tr("Error starting %1: %2").arg(gamePath, game.errorString()));
     }
