@@ -36,7 +36,8 @@ SOURCES += \
     updater.cpp \
     runtimeerror.cpp \
     installnotice.cpp \
-    installprogress.cpp
+    installprogress.cpp \
+    aria2client.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -45,7 +46,8 @@ HEADERS += \
     runtimeerror.h \
     task.h \
     installnotice.h \
-    installprogress.h
+    installprogress.h \
+    aria2client.h
 
 FORMS += \
     mainwindow.ui \
