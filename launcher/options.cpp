@@ -6,9 +6,9 @@
 #include <QtDebug>
 
 const std::map<const QString, const QVariant> Options::defaultOptions = {
-    {"path", "."},
-    {"repos/program", "https://s3.wasabisys.com/ao-manifests/program_${os}_${arch}.json"},
-    {"repos/assets", "https://s3.wasabisys.com/ao-manifests/assets.json"},
+    {"path", "client"},
+    {"repos/program", "https://server.raidensnakesden.net/program_${os}_${arch}.json"},
+    {"repos/assets", "https://server.raidensnakesden.net/assets.json"},
     {"checkOnLaunch", Qt::CheckState::Checked},
     {"version", APP_VERSION}
 };

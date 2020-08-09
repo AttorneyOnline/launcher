@@ -399,13 +399,13 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
         }
 
         if (!hash.isEmpty()) {
-            QCryptographicHash sha1(QCryptographicHash::Sha1);
-            sha1.addData(&file);
-            if (sha1.result().toHex() == hash) {
+            QCryptographicHash sha256(QCryptographicHash::Sha256);
+            sha256.addData(&file);
+            if (sha256.result().toHex() == hash) {
                 skipDownload = true;
             } else {
                 qWarning() << "checksum mismatch: expected" << hash
-                           << "but got" << sha1.result().toHex();
+                           << "but got" << sha256.result().toHex();
             }
         }
 
@@ -467,11 +467,11 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
 
         // Calculate SHA-1 checksum of file
         if (!hash.isEmpty()) {
-            QCryptographicHash sha1(QCryptographicHash::Sha1);
-            sha1.addData(&file);
-            if (sha1.result().toHex() != hash) {
+            QCryptographicHash sha256(QCryptographicHash::Sha256);
+            sha256.addData(&file);
+            if (sha256.result().toHex() != hash) {
                 qCritical() << "checksum: expected" << hash
-                            << "but got" << sha1.result().toHex();
+                            << "but got" << sha256.result().toHex();
                 throw RuntimeError(tr("Checksum of file %1 was invalid.")
                                    .arg(url.toDisplayString()));
             }
