@@ -1,3 +1,6 @@
 [submodule "libs/QArchive"]
 	path = libs/QArchive
 	url = https://github.com/antony-jr/QArchive
+[submodule "libs/aria2"]
+	path = libs/aria2
+	url = https://github.com/aria2/aria2.git
