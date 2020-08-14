@@ -62,5 +62,10 @@ RESOURCES += \
 QT += concurrent
 
 LIBS += ../libs/QArchive/release/libQArchive.a -larchive -lnettle -lxml2
+LIBS += -L../libs/aria2/release/lib -laria2
+
 
 INCLUDEPATH += ../libs/QArchive ../libs/QArchive/include
+INCLUDEPATH += ../libs/aria2/src/includes/ ../libs/aria2/src/
+
+
