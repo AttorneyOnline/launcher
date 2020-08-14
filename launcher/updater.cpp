@@ -493,12 +493,15 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
         // (Yeah, we're gonna do this crappy trick again...)
         eventLoop.reset(new QEventLoop());
         QArchive::DiskExtractor extractor(filename, installDir.path(), this, false);
+        // Note. The parmeters of the signal QArchive::DiskExtractor::error do not match the slot.
+        // QArchive::DiskExtractor::error emits short code only
         QObject::connect(&extractor, &QArchive::DiskExtractor::error,
-                         [&](short code, const QString &file) {
-            error = true;
-            errorMsg = file;
-            errorCode = code;
-            qCritical() << "Error extracting" << file << "- code" << code;
+                         [&](short code) {
+             const QString file("Unknown file");
+             error = true;
+             errorMsg = file;
+             errorCode = code;
+             qCritical() << "Error extracting" << file << "- code" << code;
             emit eventLoop->quit();
         });
         QObject::connect(&extractor, &QArchive::DiskExtractor::progress,
