@@ -63,5 +63,9 @@ QT += concurrent
 
 LIBS += ../libs/QArchive/libQArchive.a -larchive -lbz2 -llzma -llz4 -lz -lzstd -lnettle -lexpat -lxml2
 win32:LIBS += -lbcrypt -liconv
+LIBS += -L../libs/aria2/release/lib -laria2
 
 INCLUDEPATH += ../libs/QArchive ../libs/QArchive/include
+INCLUDEPATH += ../libs/aria2/src/includes/ ../libs/aria2/src/
+
+
