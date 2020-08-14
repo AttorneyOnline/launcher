@@ -1,5 +1,5 @@
 #include "aria2client.h"
-
+#include <aria2api.h>
 #include <QCoreApplication>
 #include <QDebug>
 
@@ -75,7 +75,7 @@ int Aria2Client::downloadCallback(aria2::Session *session,
   case aria2::EVENT_ON_DOWNLOAD_ERROR:
   case aria2::EVENT_ON_DOWNLOAD_STOP:
 
-    emit finished(true);
+    emit finished(CONNECTION_FAILED);
     break;
   default:
     qWarning() << "unknown aria2 event" << event;
