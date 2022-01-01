@@ -14,18 +14,16 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMessageBox>
-#include <QResource>
 #include <QSaveFile>
 #include <QSettings>
+#include <memory>
+#include <utility>
 
-extern template const QString Options::getOption<QString>(const QSettings &settings, const QString &option);
+extern template QString Options::getOption<QString>(const QSettings &settings, const QString &option);
 
-Updater::Updater(const QString &manifestUrl, const QString &repoName)
-    : manifestUrl(manifestUrl), repoName(repoName) {
-
-}
-
-Updater::~Updater() {
+Updater::Updater(QString manifestUrl, QString repoName)
+    : manifestUrl(std::move(manifestUrl))
+    , repoName(std::move(repoName)) {
 
 }
 
@@ -104,7 +102,7 @@ void Updater::fetchManifest() {
     }
 
     // Parse JSON
-    QJsonParseError err;
+    QJsonParseError err{};
     const QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &err);
 
     if (err.error) {
@@ -156,7 +154,7 @@ QByteArray Updater::fetchBranding() {
     if (reply->error()) {
         qWarning() << "Network error getting branding:"
                    << reply->errorString();
-        return QByteArray();
+        return {};
     }
 
     // Get resource file data
@@ -167,7 +165,7 @@ QByteArray Updater::fetchBranding() {
 }
 
 void Updater::cancel() {
-    if (eventLoop.get() != nullptr) {
+    if (eventLoop != nullptr) {
         eventLoop->exit(1);
     }
 }
@@ -433,7 +431,7 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
             std::unique_ptr<QNetworkReply> reply(http.get(request));
 
             {
-                eventLoop.reset(new QEventLoop());
+                eventLoop = std::make_unique<QEventLoop>();
                 connect(reply.get(), &QNetworkReply::downloadProgress, [&](qint64 bytesReceived, qint64 bytesTotal) {
                     if (bytesTotal > 0) {
                         emit subtaskProgress(static_cast<int>(bytesReceived / static_cast<double>(bytesTotal) * 100));
@@ -447,7 +445,7 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
                 // TODO: add timer in case the download stalls
 
                 int returnCode = eventLoop->exec();
-                eventLoop.release();
+                eventLoop = nullptr;
                 if (returnCode) {
                     emit reply->abort();
                     throw RuntimeError(tr("The installation was canceled by the user."));
@@ -491,33 +489,37 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
 
     {
         // (Yeah, we're gonna do this crappy trick again...)
-        eventLoop.reset(new QEventLoop());
-        QArchive::DiskExtractor extractor(filename, installDir.path(), this, false);
-        QObject::connect(&extractor, &QArchive::DiskExtractor::error,
-                         [&](short code, const QString &file) {
+        eventLoop = std::make_unique<QEventLoop>();
+        auto *extractor = new QArchive::DiskExtractor(this, false);
+        extractor->setArchive(filename, installDir.path());
+        extractor->setCalculateProgress(true);
+        QObject::connect(extractor, &QArchive::Extractor::error,
+                         [&](short code) {
             error = true;
-            errorMsg = file;
+            errorMsg = QArchive::errorCodeToString(code);
             errorCode = code;
-            qCritical() << "Error extracting" << file << "- code" << code;
+            qCritical() << "Error extracting archive:" << errorMsg << "- code" << errorCode;
             emit eventLoop->quit();
         });
-        QObject::connect(&extractor, &QArchive::DiskExtractor::progress,
-                         [&](QString file, int filesDone, int totalFiles, int percent) {
-            emit subtaskProgress(percent, tr("[%1/%2] %3")
+        QObject::connect(extractor, &QArchive::Extractor::progress,
+                         [this](const QString &file, int filesDone, int totalFiles,
+                                 qint64 bytesProcessed, qint64 bytesTotal) {
+            emit subtaskProgress((int) ((double) bytesProcessed / (double) bytesTotal * 100.0),
+                                 tr("[%1/%2] %3")
                                  .arg(filesDone)
                                  .arg(totalFiles)
                                  .arg(file));
         });
-        QObject::connect(&extractor, &QArchive::DiskExtractor::finished, eventLoop.get(), &QEventLoop::quit);
+        QObject::connect(extractor, &QArchive::Extractor::diskFinished,
+                         eventLoop.get(), &QEventLoop::quit);
 
-        extractor.setCalculateProgress(true);
-        extractor.setBlockSize(16384); // 16K blocks
-        extractor.start();
+        extractor->setBlockSize(16384); // 16K blocks
+        extractor->start();
 
         int returnCode = eventLoop->exec();
-        eventLoop.release();
+        eventLoop = nullptr;
         if (returnCode) {
-            extractor.cancel();
+            extractor->cancel();
             throw RuntimeError(tr("The installation was canceled by the user."));
         }
     }

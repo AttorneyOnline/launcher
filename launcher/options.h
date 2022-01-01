@@ -14,20 +14,20 @@ class Options : public QDialog
 
 public:
     explicit Options(QWidget *parent = nullptr);
-    ~Options();
+    ~Options() override;
 
     static const std::map<const QString, const QVariant> defaultOptions;
 
     template <typename T>
-    static const T getOption (const QSettings &settings, const QString &option);
+    static T getOption(const QSettings &settings, const QString &option);
 
-    static const QString getRepositoryUrl (const QSettings &settings, const QString &repo);
+    static QString getRepositoryUrl(const QSettings &settings, const QString &repo);
 private:
-    Ui::Options *ui;
+    QScopedPointer<Ui::Options> ui;
 
 private slots:
     void on_btnBrowseInstallPath_clicked();
-    void accept();
+    void accept() override;
 };
 
 #endif // OPTIONS_H

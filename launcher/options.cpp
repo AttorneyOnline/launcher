@@ -7,20 +7,20 @@
 
 const std::map<const QString, const QVariant> Options::defaultOptions = {
     {"path", "."},
-    {"repos/program", "https://s3.wasabisys.com/ao-manifests/program_${os}_${arch}.json"},
-    {"repos/assets", "https://s3.wasabisys.com/ao-manifests/assets.json"},
+    {"repos/program", "https://ao-manifests.s3.wasabisys.com/program_${os}_${arch}.json"},
+    {"repos/assets", "https://ao-manifests.s3.wasabisys.com/assets.json"},
     {"checkOnLaunch", Qt::CheckState::Checked},
     {"version", APP_VERSION}
 };
 
 template <typename T>
-const T Options::getOption(const QSettings &settings, const QString &option) {
+T Options::getOption(const QSettings &settings, const QString &option) {
     return settings.value(option, defaultOptions.at(option)).value<T>();
 }
 
-template const QString Options::getOption<QString>(const QSettings &settings, const QString &option);
+template QString Options::getOption<QString>(const QSettings &settings, const QString &option);
 
-const QString Options::getRepositoryUrl(const QSettings &settings, const QString &repo) {
+QString Options::getRepositoryUrl(const QSettings &settings, const QString &repo) {
     auto repoUrl = getOption<QString>(settings, "repos/" + repo);
 
     // OSes of interest: winnt, darwin, linux
@@ -51,9 +51,7 @@ Options::Options(QWidget *parent) :
                                                  .value<Qt::CheckState>());
 }
 
-Options::~Options() {
-    delete ui;
-}
+Options::~Options() = default;
 
 void Options::on_btnBrowseInstallPath_clicked() {
     QString path = QFileDialog::getExistingDirectory(this, tr("Browse Install Path"));

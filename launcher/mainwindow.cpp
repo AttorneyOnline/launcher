@@ -26,7 +26,7 @@
 #include <QTimer>
 #include <QResource>
 
-extern template const QString Options::getOption<QString>(const QSettings &settings, const QString &option);
+extern template QString Options::getOption<QString>(const QSettings &settings, const QString &option);
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),

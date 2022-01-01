@@ -7,15 +7,14 @@
 #include <QObject>
 #include <QString>
 
-#include <bits/unique_ptr.h>
+#include <memory>
 
 class Updater : public QObject
 {
     Q_OBJECT
 
 public:
-    Updater(const QString &manifestUrl, const QString &repoName);
-    ~Updater();
+    Updater(QString manifestUrl, QString repoName);
 
     QString latestVersion() const;
     bool checkForUpdates(const QString &curVersion) const;
