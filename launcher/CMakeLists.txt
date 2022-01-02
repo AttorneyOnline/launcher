@@ -1,4 +1,5 @@
 target_sources(launcher PRIVATE
+aria2client.cpp
 installnotice.cpp
 installprogress.cpp
 main.cpp

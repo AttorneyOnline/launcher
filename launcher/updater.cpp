@@ -2,6 +2,7 @@
 #include "runtimeerror.h"
 #include "options.h"
 #include "updater.h"
+#include "aria2client.h"
 
 #include <QArchive>
 
@@ -166,7 +167,7 @@ QByteArray Updater::fetchBranding() {
 
 void Updater::cancel() {
     if (eventLoop != nullptr) {
-        eventLoop->exit(1);
+        eventLoop->exit(-1);
     }
 }
 
@@ -397,6 +398,8 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
         }
 
         if (!hash.isEmpty()) {
+            emit subtaskProgress(0, tr("Calculating checksum of existing file %1")
+                .arg(url.toDisplayString()));
             QCryptographicHash sha1(QCryptographicHash::Sha1);
             sha1.addData(&file);
             if (sha1.result().toHex() == hash) {
@@ -412,70 +415,25 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
 
     if (!skipDownload) {
         // Download file
-        {
-            QSaveFile saveFile(filename);
+        eventLoop = std::make_unique<QEventLoop>();
 
-            // Open file for writing
-            if (!saveFile.open(QIODevice::WriteOnly)) {
-                throw RuntimeError(tr("Could not create download file: %1")
-                                   .arg(saveFile.errorString()));
-            }
+        std::unique_ptr<Aria2Client> downloader = std::make_unique<Aria2Client>(this);
+        connect(downloader.get(), &Aria2Client::progress, [this](uint64_t current, uint64_t max, uint64_t speed) {
+            emit subtaskProgress(static_cast<int>(static_cast<double>(current) / static_cast<double>(max) * 100),
+                                 tr("%1 KB/s")
+                                 .arg(QLocale::system().toString(static_cast<double>(speed) / 1024, 'f', 1)));
+        });
+        connect(downloader.get(), &Aria2Client::finished, eventLoop.get(), &QEventLoop::exit);
 
-            // Perform HTTP GET request
-            QNetworkRequest request(url);
-            request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
-            request.setAttribute(QNetworkRequest::FollowRedirectsAttribute,
-                                 QNetworkRequest::NoLessSafeRedirectPolicy);
+        downloader->download(url.toString(), hash, filename);
 
-            QNetworkAccessManager http;
-            std::unique_ptr<QNetworkReply> reply(http.get(request));
-
-            {
-                eventLoop = std::make_unique<QEventLoop>();
-                connect(reply.get(), &QNetworkReply::downloadProgress, [&](qint64 bytesReceived, qint64 bytesTotal) {
-                    if (bytesTotal > 0) {
-                        emit subtaskProgress(static_cast<int>(bytesReceived / static_cast<double>(bytesTotal) * 100));
-                    }
-                });
-                connect(reply.get(), &QNetworkReply::readyRead, [&]() {
-                    saveFile.write(reply->readAll());
-                });
-                connect(reply.get(), &QNetworkReply::finished, eventLoop.get(), &QEventLoop::quit);
-
-                // TODO: add timer in case the download stalls
-
-                int returnCode = eventLoop->exec();
-                eventLoop = nullptr;
-                if (returnCode) {
-                    emit reply->abort();
-                    throw RuntimeError(tr("The installation was canceled by the user."));
-                }
-            }
-
-            saveFile.commit();
+        int returnCode = eventLoop->exec();
+        eventLoop = nullptr;
+        if (returnCode == -1) {
+            throw RuntimeError(tr("The installation was canceled by the user."));
+        } else if (returnCode) {
+            throw RuntimeError(Aria2Client::errorString(static_cast<DownloadError>(returnCode)));
         }
-
-        // Reopen file to calculate checksum
-        if (!file.open(QIODevice::ReadOnly)) {
-            throw RuntimeError(tr("Could not read downloaded file: %1")
-                               .arg(file.errorString()));
-        }
-
-        emit subtaskProgress(100, tr("Calculating checksum of %1").arg(url.toDisplayString()));
-
-        // Calculate SHA-1 checksum of file
-        if (!hash.isEmpty()) {
-            QCryptographicHash sha1(QCryptographicHash::Sha1);
-            sha1.addData(&file);
-            if (sha1.result().toHex() != hash) {
-                qCritical() << "checksum: expected" << hash
-                            << "but got" << sha1.result().toHex();
-                throw RuntimeError(tr("Checksum of file %1 was invalid.")
-                                   .arg(url.toDisplayString()));
-            }
-        }
-
-        file.close();
     }
 
     emit subtaskProgress(100, tr("Extracting %1").arg(file.fileName()));

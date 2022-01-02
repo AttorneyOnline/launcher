@@ -22,6 +22,7 @@ endif()
 
 find_package(Qt5 COMPONENTS Core Gui Network Widgets Concurrent REQUIRED)
 find_package(LibArchive REQUIRED)
+find_library(Aria2 NAMES aria2 REQUIRED)
 add_subdirectory(libs/QArchive)
 target_link_libraries(launcher PRIVATE Qt5::Core Qt5::Gui Qt5::Network Qt5::Widgets Qt5::Concurrent
-    LibArchive::LibArchive QArchive)
+    LibArchive::LibArchive QArchive Aria2)
