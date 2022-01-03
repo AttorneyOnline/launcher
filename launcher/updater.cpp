@@ -566,11 +566,8 @@ void Updater::taskMove(QDir &installDir, const QString &source, const QString &t
     emit subtaskProgress(100, tr("Moving %1 to %2").arg(source, target));
 
     // Move only if source and target are within the installation directory
-    QDir fromDir(installDir.filePath(source));
-    QDir toDir(installDir.filePath(target));
-
-    if (!fromDir.canonicalPath().startsWith(installDir.canonicalPath())
-            || !toDir.canonicalPath().startsWith(installDir.canonicalPath())) {
+    if (!installDir.absoluteFilePath(source).startsWith(installDir.absolutePath())
+            || !installDir.absoluteFilePath(target).startsWith(installDir.absolutePath())) {
         qWarning() << target << ": ignoring invalid path!";
     } else {
         installDir.rename(source, target);
