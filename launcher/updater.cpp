@@ -418,10 +418,13 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
         eventLoop = std::make_unique<QEventLoop>();
 
         std::unique_ptr<Aria2Client> downloader = std::make_unique<Aria2Client>(this);
-        connect(downloader.get(), &Aria2Client::progress, [this](uint64_t current, uint64_t max, uint64_t speed) {
-            emit subtaskProgress(static_cast<int>(static_cast<double>(current) / static_cast<double>(max) * 100),
-                                 tr("%1 KB/s")
-                                 .arg(QLocale::system().toString(static_cast<double>(speed) / 1024, 'f', 1)));
+        connect(downloader.get(), &Aria2Client::progress, [this, url](uint64_t current, uint64_t max, uint64_t speed) {
+            int downloadPercent = (int) ((double) current / (double) max * 100.0);
+            int subPercent = (int) ((double) (downloadPercent / 200.0) / totalTasks * 100.0);
+            emit installProgress(getInstallProgress() + subPercent);
+            emit subtaskProgress(downloadPercent, tr("[%1 KB/s] %2")
+                                 .arg(QLocale::system().toString(static_cast<double>(speed) / 1024, 'f', 1),
+                                      url.toString()));
         });
         connect(downloader.get(), &Aria2Client::finished, eventLoop.get(), &QEventLoop::exit);
 
@@ -461,9 +464,11 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
         });
         QObject::connect(extractor, &QArchive::Extractor::progress,
                          [this](const QString &file, int filesDone, int totalFiles,
-                                 qint64 bytesProcessed, qint64 bytesTotal) {
-            emit subtaskProgress((int) ((double) bytesProcessed / (double) bytesTotal * 100.0),
-                                 tr("[%1/%2] %3")
+                                    qint64 bytesProcessed, qint64 bytesTotal) {
+            int extractPercent = (int) ((double) bytesProcessed / (double) bytesTotal * 100.0);
+            int subPercent = (int) ((double) (extractPercent / 200.0 + 0.5) / totalTasks * 100.0);
+            emit installProgress(getInstallProgress() + subPercent);
+            emit subtaskProgress(extractPercent, tr("[%1/%2] %3")
                                  .arg(filesDone)
                                  .arg(totalFiles)
                                  .arg(file));
