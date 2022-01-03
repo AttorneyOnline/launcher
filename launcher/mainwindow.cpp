@@ -4,23 +4,15 @@
 #include "installnotice.h"
 #include "installprogress.h"
 #include "options.h"
-#include "options.h"
-#include "runtimeerror.h"
 #include "task.h"
 #include "updater.h"
 
 #include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QSslConfiguration>
-#include <QtNetwork/QNetworkReply>
 
 #include <QCoreApplication>
 #include <QSettings>
-#include <QFile>
 #include <QJsonDocument>
-#include <QJsonObject>
 #include <QMessageBox>
-#include <QtDebug>
 #include <QException>
 #include <QJsonArray>
 #include <QTimer>
