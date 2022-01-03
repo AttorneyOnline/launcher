@@ -114,8 +114,8 @@ void MainWindow::install() {
 
         if (files.count() > 0 && !(files.count() == 1 && files.contains(launcherFilename))) {
             if (QMessageBox::question(this, tr("Installing in an Occupied Folder"),
-                                      tr("You are trying to install in a folder that is not "
-                                         "empty! Are you sure you wish to continue?"),
+                                      tr("You are trying to install in a folder (%1) that is not "
+                                         "empty! Are you sure you wish to continue?").arg(installPath.canonicalPath()),
                                       QMessageBox::Ok | QMessageBox::Cancel)
                     != QMessageBox::Ok) {
                 return;
@@ -155,6 +155,7 @@ void MainWindow::install() {
             progress.setWindowTitle(tr("Installing %1 (%2)…").arg(package, updater.latestVersion()));
             updater.install(versionInfo.value(package + "/version").toString());
         }
+        QMessageBox::information(this, tr("Install Success"), tr("Install successful!"));
     } catch (const QException &e) {
         QMessageBox message(this);
         message.setIcon(QMessageBox::Critical);

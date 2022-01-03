@@ -42,30 +42,37 @@ const QMap<DownloadError, QString> errorCodeMessages {
         {BAD_CHECKSUM, "The file was downloaded, but its checksum is invalid."},
 };
 
+const char *TEMP_LOG_FILE = "download.log";
+
 Aria2Client::Aria2Client(QObject *parent) : QObject(parent)
 {
     static bool library_inited = false;
     if (!library_inited) {
         aria2::libraryInit();
+        library_inited = true;
     }
+
     config.downloadEventCallback = downloadCallback;
     config.userData = this;
+
     qRegisterMetaType<sys_time>();
     connect(this, &Aria2Client::downloadLoop,
             this, &Aria2Client::downloadLoopBody, Qt::QueuedConnection);
+    connect(this, &Aria2Client::finished, [this](DownloadError err) {
+        if (err) return;
+        QFile(TEMP_LOG_FILE).remove();
+    });
 }
 
-Aria2Client::~Aria2Client()
-{
-    // aria2::libraryDeinit();
-}
+Aria2Client::~Aria2Client() = default;
 
 void Aria2Client::download(const QString &uri, const QString &checksum,
                            const QString &outFile)
 {
     session = aria2::sessionNew(aria2::KeyVals {
-        { "log", "download.log" },
-        { "ca-certificate", "ca-certificates.crt" }
+        { "log", TEMP_LOG_FILE },
+        { "log-level", "info" },
+        { "ca-certificate", "ca-certificates.crt" },
     }, config);
 
     QFileInfo fileInfo(outFile);
@@ -153,12 +160,10 @@ int Aria2Client::downloadCallback(aria2::Session *cbSession,
         case aria2::EVENT_ON_DOWNLOAD_COMPLETE:
         case aria2::EVENT_ON_BT_DOWNLOAD_COMPLETE:
             debug << " finished";
-//            emit client->finished(NO_ERROR);
             break;
         case aria2::EVENT_ON_DOWNLOAD_ERROR:
         case aria2::EVENT_ON_DOWNLOAD_STOP:
             debug << " stopped/had an error";
-//            emit client->finished(errorCodes.value(dh->getErrorCode(), UNKNOWN_ERROR));
             break;
         default:
             qWarning() << "unknown aria2 event" << event;

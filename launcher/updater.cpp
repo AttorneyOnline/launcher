@@ -422,9 +422,10 @@ void Updater::taskDownload(QDir &installDir, const QUrl &url, const QString &has
             int downloadPercent = (int) ((double) current / (double) max * 100.0);
             int subPercent = (int) ((double) (downloadPercent / 200.0) / totalTasks * 100.0);
             emit installProgress(getInstallProgress() + subPercent);
-            emit subtaskProgress(downloadPercent, tr("[%1 KB/s] %2")
-                                 .arg(QLocale::system().toString(static_cast<double>(speed) / 1024, 'f', 1),
-                                      url.toString()));
+            emit subtaskProgress(downloadPercent, tr("[%1 KB/s] %2 (%3 MB)")
+                                 .arg(QLocale::system().toString((double) speed / 1024, 'f', 1),
+                                      url.toString(),
+                                      QLocale::system().toString((double) max / (1024 * 1024), 'f', 1)));
         });
         connect(downloader.get(), &Aria2Client::finished, eventLoop.get(), &QEventLoop::exit);
 

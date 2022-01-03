@@ -6,7 +6,7 @@
 #include <QtDebug>
 
 const std::map<const QString, const QVariant> Options::defaultOptions = {
-    {"path", "."},
+    {"path", "./Attorney Online"},
     {"repos/program", "https://ao-manifests.s3.wasabisys.com/program_${os}_${arch}.json"},
     {"repos/assets", "https://ao-manifests.s3.wasabisys.com/assets.json"},
     {"checkOnLaunch", Qt::CheckState::Checked},
