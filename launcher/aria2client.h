@@ -7,6 +7,7 @@
 #include <QMap>
 
 #include <aria2/aria2.h>
+#include <QTemporaryFile>
 
 enum DownloadError {
     NO_ERROR = 0,
@@ -43,6 +44,7 @@ public:
 private:
     aria2::Session *session;
     aria2::SessionConfig config;
+    QTemporaryFile *caRootFile;
 
     static int downloadCallback(aria2::Session* cbSession, aria2::DownloadEvent event,
                                 aria2::A2Gid gid, void* userData);

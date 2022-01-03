@@ -52,8 +52,17 @@ Aria2Client::Aria2Client(QObject *parent) : QObject(parent)
         library_inited = true;
     }
 
+    caRootFile = QTemporaryFile::createNativeFile(":/res/ca-certificates.crt");
+    caRootFile->setParent(this);
+
     config.downloadEventCallback = downloadCallback;
     config.userData = this;
+
+    session = aria2::sessionNew(aria2::KeyVals {
+            { "log", TEMP_LOG_FILE },
+            { "log-level", "info" },
+            { "ca-certificate", caRootFile->fileName().toStdString() },
+    }, config);
 
     qRegisterMetaType<sys_time>();
     connect(this, &Aria2Client::downloadLoop,
@@ -69,12 +78,6 @@ Aria2Client::~Aria2Client() = default;
 void Aria2Client::download(const QString &uri, const QString &checksum,
                            const QString &outFile)
 {
-    session = aria2::sessionNew(aria2::KeyVals {
-        { "log", TEMP_LOG_FILE },
-        { "log-level", "info" },
-        { "ca-certificate", "ca-certificates.crt" },
-    }, config);
-
     QFileInfo fileInfo(outFile);
     aria2::KeyVals options {
             { "max-connection-per-server", "3" },

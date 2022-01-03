@@ -3,5 +3,6 @@
         <file>res/install_notice.html</file>
         <file>res/fugue-arrow-circle-315.png</file>
         <file>res/logo.png</file>
+        <file>res/ca-certificates.crt</file>
     </qresource>
 </RCC>
