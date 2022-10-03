@@ -1,0 +1,117 @@
+name: CI build
+
+on: [push]
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - 5.15.1
+        platform:
+          - gcc_64
+          - msvc2019
+          - mingw81_32
+          - clang_64
+
+        include:
+          - platform: gcc_64
+            os: ubuntu-latest
+          - platform: msvc2019
+            os: windows-2019
+          - platform: mingw81_32
+            os: windows-latest
+          - platform: clang_64
+            os: macos-latest
+
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@master
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@master
+        with:
+          python-version: '3.10'
+          
+      - name: actions/cache qt
+        uses: actions/cache@master
+        id: cache
+        with:
+          path: qt/${{matrix.version}}/${{matrix.platform}}
+          key: qt-${{matrix.version}}-${{matrix.platform}}
+
+      - name: Add msbuild to PATH
+        if: matrix.platform == 'msvc2019'
+        uses: microsoft/setup-msbuild@master
+        
+      - uses: Skycoder42/action-setup-qt@master
+        id: qt
+        with:
+          version: ${{matrix.version}}
+          platform: ${{matrix.platform}}
+
+      - name: qmake
+        run: |
+          qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation" DEFINES+=DISCORD CONFIG+=install_ok QT_PLATFORM=${{matrix.platform}}
+
+      - name: build
+        run: |
+          ${{steps.qt.outputs.make}}
+
+      - name: Deploy Windows
+        if: contains(matrix.os, 'windows')
+        working-directory: ${{github.workspace}}/bin/
+        shell: bash
+        run: |
+          windeployqt --no-quick-import --no-translations --no-virtualkeyboard --no-compiler-runtime --no-webkit2 --no-opengl-sw .
+          rm ./imageformats/qtiff.dll
+          rm ./imageformats/qjpeg.dll
+          rm ./imageformats/qicns.dll
+          rm ./imageformats/qico.dll
+          rm ./imageformats/qsvg.dll
+          rm ./imageformats/qtga.dll
+          rm ./imageformats/qwbmp.dll
+          rm ./Qt5Svg.dll
+          rm -r iconengines
+          rm -r bearer
+          rm -r styles
+
+      - name: Deploy Linux
+        if: matrix.platform == 'gcc_64'
+        working-directory: ${{github.workspace}}/bin/
+        shell: bash
+        run: |
+          cp ../scripts/launch.sh .
+          chmod +x launch.sh
+          chmod +x Attorney_Online
+          tar -cf Attorney_Online.tar ./*
+          rm -rf imageformats
+          rm *.so
+          rm *.sh
+          rm Attorney_Online
+
+      - name: Deploy Mac
+        if: matrix.os == 'macos-latest'
+        working-directory: ${{github.workspace}}/bin/
+        shell: bash
+        run: |
+          macdeployqt Attorney_Online.app
+          cp ../QtApng/plugins/imageformats/libqapng.dylib ./Attorney_Online.app/Contents/PlugIns/imageformats/
+          mv *.dylib ./Attorney_Online.app/Contents/Frameworks
+          install_name_tool -change @loader_path/libbass.dylib @rpath/libbass.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
+          install_name_tool -change @loader_path/libbassopus.dylib @rpath/libbassopus.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
+          install_name_tool -change @loader_path/libbassmidi.dylib @rpath/libbassmidi.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
+          install_name_tool -change @loader_path/libdiscord-rpc.dylib @rpath/libdiscord-rpc.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
+          install_name_tool -change @loader_path/libqapng.dylib @rpath/libqapng.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
+          hdiutil create -volname "Attorney_Online" -srcfolder "./Attorney_Online.app" -ov -format UDZO "Attorney_Online.dmg"
+          rm -r ./Attorney_Online.app/
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: Attorney_Online-${{matrix.os}}-${{matrix.platform}}
+          path: ${{github.workspace}}/bin/
