@@ -87,31 +87,31 @@ jobs:
         run: |
           cp ../scripts/launch.sh .
           chmod +x launch.sh
-          chmod +x Attorney_Online
-          tar -cf Attorney_Online.tar ./*
+          chmod +x launcher
+          tar -cf launcher.tar ./*
           rm -rf imageformats
           rm *.so
           rm *.sh
-          rm Attorney_Online
+          rm launcher
 
       - name: Deploy Mac
         if: matrix.os == 'macos-latest'
         working-directory: ${{github.workspace}}/bin/
         shell: bash
         run: |
-          macdeployqt Attorney_Online.app
-          cp ../QtApng/plugins/imageformats/libqapng.dylib ./Attorney_Online.app/Contents/PlugIns/imageformats/
-          mv *.dylib ./Attorney_Online.app/Contents/Frameworks
-          install_name_tool -change @loader_path/libbass.dylib @rpath/libbass.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
-          install_name_tool -change @loader_path/libbassopus.dylib @rpath/libbassopus.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
-          install_name_tool -change @loader_path/libbassmidi.dylib @rpath/libbassmidi.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
-          install_name_tool -change @loader_path/libdiscord-rpc.dylib @rpath/libdiscord-rpc.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
-          install_name_tool -change @loader_path/libqapng.dylib @rpath/libqapng.dylib ./Attorney_Online.app/Contents/MacOS/Attorney_Online
-          hdiutil create -volname "Attorney_Online" -srcfolder "./Attorney_Online.app" -ov -format UDZO "Attorney_Online.dmg"
-          rm -r ./Attorney_Online.app/
+          macdeployqt launcher.app
+          cp ../QtApng/plugins/imageformats/libqapng.dylib ./launcher.app/Contents/PlugIns/imageformats/
+          mv *.dylib ./launcher.app/Contents/Frameworks
+          install_name_tool -change @loader_path/libbass.dylib @rpath/libbass.dylib ./launcher.app/Contents/MacOS/launcher
+          install_name_tool -change @loader_path/libbassopus.dylib @rpath/libbassopus.dylib ./launcher.app/Contents/MacOS/launcher
+          install_name_tool -change @loader_path/libbassmidi.dylib @rpath/libbassmidi.dylib ./launcher.app/Contents/MacOS/launcher
+          install_name_tool -change @loader_path/libdiscord-rpc.dylib @rpath/libdiscord-rpc.dylib ./launcher.app/Contents/MacOS/launcher
+          install_name_tool -change @loader_path/libqapng.dylib @rpath/libqapng.dylib ./launcher.app/Contents/MacOS/launcher
+          hdiutil create -volname "launcher" -srcfolder "./launcher.app" -ov -format UDZO "launcher.dmg"
+          rm -r ./launcher.app/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
-          name: Attorney_Online-${{matrix.os}}-${{matrix.platform}}
+          name: launcher-${{matrix.os}}-${{matrix.platform}}
           path: ${{github.workspace}}/bin/
