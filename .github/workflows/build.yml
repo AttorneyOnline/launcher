@@ -47,6 +47,11 @@ jobs:
       - name: Add msbuild to PATH
         if: matrix.platform == 'msvc2019'
         uses: microsoft/setup-msbuild@master
+
+      - name: Install dependencies
+        if: matrix.platform == 'gcc_64'
+        run: |
+          sudo apt install libarchive-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev nettle-dev libexpat1-dev libxml2-dev
         
       - uses: Skycoder42/action-setup-qt@master
         id: qt
