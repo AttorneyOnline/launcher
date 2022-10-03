@@ -69,7 +69,6 @@ jobs:
 
       - name: Deploy Windows
         if: contains(matrix.os, 'windows')
-        working-directory: ${{github.workspace}}/bin/
         shell: bash
         run: |
           windeployqt --no-quick-import --no-translations --no-virtualkeyboard --no-compiler-runtime --no-webkit2 --no-opengl-sw .
@@ -87,11 +86,8 @@ jobs:
 
       - name: Deploy Linux
         if: matrix.platform == 'gcc_64'
-        working-directory: ${{github.workspace}}/bin/
         shell: bash
         run: |
-          cp ../scripts/launch.sh .
-          chmod +x launch.sh
           chmod +x launcher
           tar -cf launcher.tar ./*
           rm -rf imageformats
@@ -101,7 +97,6 @@ jobs:
 
       - name: Deploy Mac
         if: matrix.os == 'macos-latest'
-        working-directory: ${{github.workspace}}/bin/
         shell: bash
         run: |
           macdeployqt launcher.app
