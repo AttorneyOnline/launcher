@@ -7,3 +7,4 @@ SUBDIRS = libs \
 
 INCLUDEPATH += . libs/QArchive \
                libs/QArchive/include
+               libs/libarchive/libarchive
