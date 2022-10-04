@@ -7,6 +7,8 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@master
+      with:
+        submodules: recursive
 
     - name: Install dependencies
       working-directory: ${{github.workspace}}/libs/libarchive/
@@ -73,6 +75,8 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@master
+      with:
+        submodules: recursive
 
     - name: Install dependencies
       run: sudo apt-get install -y autoconf automake build-essential cmake git libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
@@ -142,6 +146,8 @@ jobs:
         be: [mingw-gcc, msvc]
     steps:
     - uses: actions/checkout@master
+      with:
+        submodules: recursive
 
     - name: Install dependencies
       working-directory: ${{github.workspace}}/libs/libarchive/
