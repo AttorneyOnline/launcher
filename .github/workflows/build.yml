@@ -1,116 +1,174 @@
-name: CI build
+name: CI
 
-on: [push]
-
-env:
-  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+on: [push, pull_request]
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - 5.15.1
-        platform:
-          - gcc_64
-          - msvc2019
-          - mingw81_32
-          - clang_64
-
-        include:
-          - platform: gcc_64
-            os: ubuntu-latest
-          - platform: msvc2019
-            os: windows-2019
-          - platform: mingw81_32
-            os: windows-latest
-          - platform: clang_64
-            os: macos-latest
-
-    runs-on: ${{matrix.os}}
+  MacOS:
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@master
-        with:
-          submodules: recursive
-          
-      - uses: actions/setup-python@master
-        with:
-          python-version: '3.10'
-          
-      - name: actions/cache qt
-        uses: actions/cache@master
-        id: cache
-        with:
-          path: qt/${{matrix.version}}/${{matrix.platform}}
-          key: qt-${{matrix.version}}-${{matrix.platform}}
+    - uses: actions/checkout@master
+    - name: Install dependencies
+      run: ./libs/libarchive/build/ci/github_actions/macos.sh prepare
+    - name: Autogen
+      run: ./libs/libarchive/build/ci/build.sh -a autogen
+      env:
+        BS: cmake
+    - name: Configure
+      run: ./libs/libarchive/build/ci/build.sh -a configure
+      env:
+        BS: cmake
+    - name: Build
+      run: ./libs/libarchive/build/ci/build.sh -a build
+      env:
+        BS: cmake
+    - name: Test
+      run: ./libs/libarchive/build/ci/build.sh -a test
+      env:
+        BS: cmake
+        SKIP_OPEN_FD_ERR_TEST: 1
+    - name: Install
+      run: ./libs/libarchive/build/ci/build.sh -a install
+      env:
+        BS: cmake
+    - name: Artifact
+      run: ./libs/libarchive/build/ci/build.sh -a artifact
+      env:
+        BS: cmake
 
-      - name: Add msbuild to PATH
-        if: matrix.platform == 'msvc2019'
-        uses: microsoft/setup-msbuild@master
+    - name: Setup Qt
+      uses: Skycoder42/action-setup-qt@master
+      id: qt
+      with:
+        version: 5.15.1
+        platform: gcc_64
 
-      - name: Install dependencies
-        if: matrix.platform == 'gcc_64'
-        run: |
-          sudo apt install libarchive-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev nettle-dev libexpat1-dev libxml2-dev
-        
-      - uses: Skycoder42/action-setup-qt@master
-        id: qt
-        with:
-          version: ${{matrix.version}}
-          platform: ${{matrix.platform}}
+    - name: QMake
+      run: |
+        qmake
 
-      - name: qmake
-        run: |
-          qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation" DEFINES+=DISCORD CONFIG+=install_ok QT_PLATFORM=${{matrix.platform}}
+    - name: Make
+      run: |
+        ${{steps.qt.outputs.make}}
 
-      - name: build
-        run: |
-          ${{steps.qt.outputs.make}}
+    - uses: actions/upload-artifact@v1
+      with:
+        name: libarchive-macos-${{ github.sha }}
+        path: libarchive.tar.xz
 
-      - name: Deploy Windows
-        if: contains(matrix.os, 'windows')
-        shell: bash
-        run: |
-          windeployqt --no-quick-import --no-translations --no-virtualkeyboard --no-compiler-runtime --no-webkit2 --no-opengl-sw .
-          rm ./imageformats/qtiff.dll
-          rm ./imageformats/qjpeg.dll
-          rm ./imageformats/qicns.dll
-          rm ./imageformats/qico.dll
-          rm ./imageformats/qsvg.dll
-          rm ./imageformats/qtga.dll
-          rm ./imageformats/qwbmp.dll
-          rm ./Qt5Svg.dll
-          rm -r iconengines
-          rm -r bearer
-          rm -r styles
+  Ubuntu:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@master
 
-      - name: Deploy Linux
-        if: matrix.platform == 'gcc_64'
-        shell: bash
-        run: |
-          chmod +x launcher
-          tar -cf launcher.tar ./*
-          rm -rf imageformats
-          rm -rf launcher
+    - name: Install dependencies
+      run: sudo apt-get install -y autoconf automake build-essential cmake git libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
 
-      - name: Deploy Mac
-        if: matrix.os == 'macos-latest'
-        shell: bash
-        run: |
-          macdeployqt launcher.app
-          cp ../QtApng/plugins/imageformats/libqapng.dylib ./launcher.app/Contents/PlugIns/imageformats/
-          mv *.dylib ./launcher.app/Contents/Frameworks
-          install_name_tool -change @loader_path/libbass.dylib @rpath/libbass.dylib ./launcher.app/Contents/MacOS/launcher
-          install_name_tool -change @loader_path/libbassopus.dylib @rpath/libbassopus.dylib ./launcher.app/Contents/MacOS/launcher
-          install_name_tool -change @loader_path/libbassmidi.dylib @rpath/libbassmidi.dylib ./launcher.app/Contents/MacOS/launcher
-          install_name_tool -change @loader_path/libdiscord-rpc.dylib @rpath/libdiscord-rpc.dylib ./launcher.app/Contents/MacOS/launcher
-          install_name_tool -change @loader_path/libqapng.dylib @rpath/libqapng.dylib ./launcher.app/Contents/MacOS/launcher
-          hdiutil create -volname "launcher" -srcfolder "./launcher.app" -ov -format UDZO "launcher.dmg"
-          rm -r ./launcher.app/
+    - name: Autogen
+      run: ./libs/libarchive/build/ci/build.sh -a autogen
+      env:
+        BS: cmake
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@master
-        with:
-          name: launcher-${{matrix.os}}-${{matrix.platform}}
-          path: ${{github.workspace}}/bin/
+    - name: Configure
+      run: ./libs/libarchive/build/ci/build.sh -a configure
+      env:
+        BS: cmake
+        CRYPTO: mbedtls
+
+    - name: Build
+      run: ./libs/libarchive/build/ci/build.sh -a build
+      env:
+        BS: cmake
+
+    - name: Test
+      run: ./libs/libarchive/build/ci/build.sh -a test
+      env:
+        BS: cmake
+        SKIP_OPEN_FD_ERR_TEST: 1
+
+    - name: Install
+      run: ./libs/libarchive/build/ci/build.sh -a install
+      env:
+        BS: cmake
+
+    - name: Artifact
+      run: ./libs/libarchive/build/ci/build.sh -a artifact
+      env:
+        BS: cmake
+
+    - name: Setup Qt
+      uses: Skycoder42/action-setup-qt@master
+      id: qt
+      with:
+        version: 5.15.1
+        platform: gcc_64
+
+    - name: QMake
+      run: |
+        qmake
+
+    - name: Make
+      run: |
+        ${{steps.qt.outputs.make}}
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: libarchive-ubuntu-${{ github.sha }}
+        path: libarchive.tar.xz
+
+  Windows:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        be: [mingw-gcc, msvc]
+    steps:
+    - uses: actions/checkout@master
+    - name: Install dependencies
+      run: ./libs/libarchive/build/ci/github_actions/ci.cmd deplibs
+      shell: cmd
+      env:
+        BE: ${{ matrix.be }}
+    - name: Configure
+      run: ./libs/libarchive/build/ci/github_actions/ci.cmd configure
+      shell: cmd
+      env:
+        BE: ${{ matrix.be }}
+    - name: Build
+      run: ./libs/libarchive/build/ci/github_actions/ci.cmd build
+      shell: cmd
+      env:
+        BE: ${{ matrix.be }}
+    - name: Test
+      run: ./libs/libarchive/build/ci/github_actions/ci.cmd test
+      shell: cmd
+      env:
+        BE: ${{ matrix.be }}
+    - name: Install
+      run: ./libs/libarchive/build/ci/github_actions/ci.cmd install
+      shell: cmd
+      env:
+        BE: ${{ matrix.be }}
+    - name: Artifact
+      run: ./libs/libarchive/build/ci/github_actions/ci.cmd artifact
+      shell: cmd
+      env:
+        BE: ${{ matrix.be }}
+
+    - name: Setup Qt
+      uses: Skycoder42/action-setup-qt@master
+      id: qt
+      with:
+        version: 5.15.1
+        platform: gcc_64
+
+    - name: QMake
+      run: |
+        qmake
+
+    - name: Make
+      run: |
+        ${{steps.qt.outputs.make}}
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: libarchive-windows-${{ matrix.be }}-${{ github.sha }}
+        path: libarchive.zip
