@@ -68,14 +68,14 @@ jobs:
         path: libarchive.tar.xz
 
   Ubuntu:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
       with:
         submodules: recursive
 
     - name: Install dependencies
-      run: sudo apt-get install -y autoconf automake build-essential cmake git libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
+      run: sudo apt-get install -y autoconf automake build-essential cmake git libarchive-dev libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
 
     - name: Autogen
       working-directory: ${{github.workspace}}/libs/libarchive/
@@ -178,7 +178,7 @@ jobs:
       id: qt
       with:
         version: 5.15.1
-        platform: gcc_64
+        platform: ${{ matrix.be }}
 
     - name: QMake
       run: |
