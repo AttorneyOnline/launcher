@@ -2,8 +2,7 @@ TEMPLATE = subdirs
 
 CONFIG += ordered
 
-SUBDIRS = libarchive
-SUBDIRS += QArchive
+SUBDIRS = QArchive
 
 INCLUDEPATH += QArchive \
            QArchive/include
