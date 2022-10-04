@@ -92,7 +92,7 @@ jobs:
           chmod +x launcher
           tar -cf launcher.tar ./*
           rm -rf imageformats
-          rm launcher
+          rm -rf launcher
 
       - name: Deploy Mac
         if: matrix.os == 'macos-latest'
