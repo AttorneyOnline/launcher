@@ -7,31 +7,45 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@master
+
     - name: Install dependencies
-      run: ./libs/libarchive/build/ci/github_actions/macos.sh prepare
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/github_actions/macos.sh prepare
+
     - name: Autogen
-      run: ./libs/libarchive/build/ci/build.sh -a autogen
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a autogen
       env:
         BS: cmake
+
     - name: Configure
-      run: ./libs/libarchive/build/ci/build.sh -a configure
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a configure
       env:
         BS: cmake
+
     - name: Build
-      run: ./libs/libarchive/build/ci/build.sh -a build
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a build
       env:
         BS: cmake
+
     - name: Test
-      run: ./libs/libarchive/build/ci/build.sh -a test
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a test
       env:
         BS: cmake
         SKIP_OPEN_FD_ERR_TEST: 1
+
     - name: Install
-      run: ./libs/libarchive/build/ci/build.sh -a install
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a install
       env:
         BS: cmake
+
     - name: Artifact
-      run: ./libs/libarchive/build/ci/build.sh -a artifact
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a artifact
       env:
         BS: cmake
 
@@ -64,34 +78,40 @@ jobs:
       run: sudo apt-get install -y autoconf automake build-essential cmake git libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
 
     - name: Autogen
-      run: ./libs/libarchive/build/ci/build.sh -a autogen
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a autogen
       env:
         BS: cmake
 
     - name: Configure
-      run: ./libs/libarchive/build/ci/build.sh -a configure
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a configure
       env:
         BS: cmake
         CRYPTO: mbedtls
 
     - name: Build
-      run: ./libs/libarchive/build/ci/build.sh -a build
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a build
       env:
         BS: cmake
 
     - name: Test
-      run: ./libs/libarchive/build/ci/build.sh -a test
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a test
       env:
         BS: cmake
         SKIP_OPEN_FD_ERR_TEST: 1
 
     - name: Install
-      run: ./libs/libarchive/build/ci/build.sh -a install
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a install
       env:
         BS: cmake
 
     - name: Artifact
-      run: ./libs/libarchive/build/ci/build.sh -a artifact
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/build.sh -a artifact
       env:
         BS: cmake
 
@@ -122,33 +142,45 @@ jobs:
         be: [mingw-gcc, msvc]
     steps:
     - uses: actions/checkout@master
+
     - name: Install dependencies
-      run: ./libs/libarchive/build/ci/github_actions/ci.cmd deplibs
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/github_actions/ci.cmd deplibs
       shell: cmd
       env:
         BE: ${{ matrix.be }}
+
     - name: Configure
-      run: ./libs/libarchive/build/ci/github_actions/ci.cmd configure
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/github_actions/ci.cmd configure
       shell: cmd
       env:
         BE: ${{ matrix.be }}
+
     - name: Build
-      run: ./libs/libarchive/build/ci/github_actions/ci.cmd build
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/github_actions/ci.cmd build
       shell: cmd
       env:
         BE: ${{ matrix.be }}
+
     - name: Test
-      run: ./libs/libarchive/build/ci/github_actions/ci.cmd test
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/github_actions/ci.cmd test
       shell: cmd
       env:
         BE: ${{ matrix.be }}
+
     - name: Install
-      run: ./libs/libarchive/build/ci/github_actions/ci.cmd install
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/github_actions/ci.cmd install
       shell: cmd
       env:
         BE: ${{ matrix.be }}
+
     - name: Artifact
-      run: ./libs/libarchive/build/ci/github_actions/ci.cmd artifact
+      working-directory: ${{github.workspace}}/libs/libarchive/
+      run: ./build/ci/github_actions/ci.cmd artifact
       shell: cmd
       env:
         BE: ${{ matrix.be }}
