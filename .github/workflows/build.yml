@@ -32,13 +32,6 @@ jobs:
       env:
         BS: cmake
 
-    - name: Test
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/build.sh -a test
-      env:
-        BS: cmake
-        SKIP_OPEN_FD_ERR_TEST: 1
-
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/build.sh -a install
@@ -100,13 +93,6 @@ jobs:
       env:
         BS: cmake
 
-    - name: Test
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/build.sh -a test
-      env:
-        BS: cmake
-        SKIP_OPEN_FD_ERR_TEST: 1
-
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/build.sh -a install
@@ -166,13 +152,6 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd build
-      shell: cmd
-      env:
-        BE: ${{ matrix.be }}
-
-    - name: Test
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/github_actions/ci.cmd test
       shell: cmd
       env:
         BE: ${{ matrix.be }}
