@@ -139,28 +139,28 @@ jobs:
       run: ./build/ci/github_actions/ci.cmd deplibs
       shell: cmd
       env:
-        BE: mingw
+        BE: mingw-gcc
 
     - name: Configure
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd configure
       shell: cmd
       env:
-        BE: mingw
+        BE: mingw-gcc
 
     - name: Build
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd build
       shell: cmd
       env:
-        BE: mingw
+        BE: mingw-gcc
 
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd install
       shell: cmd
       env:
-        BE: mingw
+        BE: mingw-gcc
 
     - name: Setup Qt
       uses: Skycoder42/action-setup-qt@master
