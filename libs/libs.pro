@@ -5,5 +5,5 @@ CONFIG += ordered
 SUBDIRS = QArchive
 
 INCLUDEPATH += QArchive \
-           QArchive/include
+           QArchive/include \
            libarchive/libarchive
