@@ -62,10 +62,10 @@ jobs:
       run: |
         ${{steps.qt.outputs.make}}
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       with:
         name: launcher-macos-${{ github.sha }}
-        path: *
+        path: ${{ github.workspace }}
 
   Ubuntu:
     runs-on: ubuntu-latest
@@ -123,10 +123,10 @@ jobs:
       run: |
         ${{steps.qt.outputs.make}}
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       with:
         name: launcher-ubuntu-${{ github.sha }}
-        path: *
+        path: ${{ github.workspace }}
 
   Windows:
     runs-on: windows-2022
@@ -188,7 +188,7 @@ jobs:
       run: |
         ${{steps.qt.outputs.make}}
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       with:
         name: launcher-windows-${{ matrix.be }}-${{ github.sha }}
-        path: *
+        path: ${{ github.workspace }}
