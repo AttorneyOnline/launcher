@@ -22,7 +22,7 @@ jobs:
       id: qt
       with:
         version: 5.15.1
-        platform: gcc_64
+        platform: clang_64
 
     - name: Install dependencies
       working-directory: ${{github.workspace}}/libs/libarchive/
