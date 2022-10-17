@@ -64,7 +64,8 @@ jobs:
 
     - uses: actions/upload-artifact@v1
       with:
-        name: libarchive-macos-${{ github.sha }}
+        name: launcher-macos-${{ github.sha }}
+        path: *
 
   Ubuntu:
     runs-on: ubuntu-latest
@@ -124,7 +125,8 @@ jobs:
 
     - uses: actions/upload-artifact@v1
       with:
-        name: libarchive-ubuntu-${{ github.sha }}
+        name: launcher-ubuntu-${{ github.sha }}
+        path: *
 
   Windows:
     runs-on: windows-2022
@@ -188,4 +190,5 @@ jobs:
 
     - uses: actions/upload-artifact@v1
       with:
-        name: libarchive-windows-${{ matrix.be }}-${{ github.sha }}
+        name: launcher-windows-${{ matrix.be }}-${{ github.sha }}
+        path: *
