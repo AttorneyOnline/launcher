@@ -13,6 +13,13 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Setup Qt
+      uses: Skycoder42/action-setup-qt@master
+      id: qt
+      with:
+        version: 5.15.1
+        platform: gcc_64
+
     - name: Install dependencies
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/macos.sh prepare
@@ -45,14 +52,6 @@ jobs:
       run: |
         brew install python
 
-
-    - name: Setup Qt
-      uses: Skycoder42/action-setup-qt@master
-      id: qt
-      with:
-        version: 5.15.1
-        platform: gcc_64
-
     - name: QMake
       run: |
         qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation"
@@ -72,6 +71,13 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: recursive
+
+    - name: Setup Qt
+      uses: Skycoder42/action-setup-qt@master
+      id: qt
+      with:
+        version: 5.15.1
+        platform: gcc_64
 
     - name: Install dependencies
       run: sudo apt-get install -y autoconf automake build-essential cmake git libarchive-dev libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
@@ -107,13 +113,6 @@ jobs:
       env:
         BS: cmake
 
-    - name: Setup Qt
-      uses: Skycoder42/action-setup-qt@master
-      id: qt
-      with:
-        version: 5.15.1
-        platform: gcc_64
-
     - name: QMake
       run: |
         qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation"
@@ -133,6 +132,13 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: recursive
+
+    - name: Setup Qt
+      uses: Skycoder42/action-setup-qt@master
+      id: qt
+      with:
+        version: 5.15.1
+        platform: mingw81_32
 
     - name: Install dependencies
       working-directory: ${{github.workspace}}/libs/libarchive/
@@ -161,13 +167,6 @@ jobs:
       shell: cmd
       env:
         BE: mingw-gcc
-
-    - name: Setup Qt
-      uses: Skycoder42/action-setup-qt@master
-      id: qt
-      with:
-        version: 5.15.1
-        platform: mingw81_32
 
     - name: QMake
       run: |
