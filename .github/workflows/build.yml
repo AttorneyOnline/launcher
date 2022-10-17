@@ -129,9 +129,6 @@ jobs:
 
   Windows:
     runs-on: windows-2022
-    strategy:
-      matrix:
-        be: [mingw-gcc, msvc]
     steps:
     - uses: actions/checkout@master
       with:
@@ -142,42 +139,35 @@ jobs:
       run: ./build/ci/github_actions/ci.cmd deplibs
       shell: cmd
       env:
-        BE: ${{ matrix.be }}
+        BE: msvc
 
     - name: Configure
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd configure
       shell: cmd
       env:
-        BE: ${{ matrix.be }}
+        BE: msvc
 
     - name: Build
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd build
       shell: cmd
       env:
-        BE: ${{ matrix.be }}
+        BE: msvc
 
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd install
       shell: cmd
       env:
-        BE: ${{ matrix.be }}
-
-    - name: Artifact
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/github_actions/ci.cmd artifact
-      shell: cmd
-      env:
-        BE: ${{ matrix.be }}
+        BE: msvc
 
     - name: Setup Qt
       uses: Skycoder42/action-setup-qt@master
       id: qt
       with:
         version: 5.15.1
-        platform: ${{ matrix.be }}
+        platform: msvc2019
 
     - name: QMake
       run: |
@@ -189,5 +179,5 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: launcher-windows-${{ matrix.be }}-${{ github.sha }}
+        name: launcher-windows-msvc-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
