@@ -41,11 +41,10 @@ jobs:
       env:
         BS: cmake
 
-    - name: Artifact
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/build.sh -a artifact
-      env:
-        BS: cmake
+    - name: Upgrade Python
+      run: |
+        brew install python
+
 
     - name: Setup Qt
       uses: Skycoder42/action-setup-qt@master
@@ -65,7 +64,7 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: launcher-macos-${{ github.sha }}
-        path: ${{ github.workspace }}
+        path: ${{ github.workspace }}/launcher/bin/
 
   Ubuntu:
     runs-on: ubuntu-latest
@@ -126,7 +125,7 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: launcher-ubuntu-${{ github.sha }}
-        path: ${{ github.workspace }}
+        path: ${{ github.workspace }}/launcher/bin/
 
   Windows:
     runs-on: windows-2022
@@ -191,4 +190,4 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: launcher-windows-${{ matrix.be }}-${{ github.sha }}
-        path: ${{ github.workspace }}
+        path: ${{ github.workspace }}/launcher/bin/
