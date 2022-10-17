@@ -50,7 +50,7 @@ jobs:
       uses: Skycoder42/action-setup-qt@master
       id: qt
       with:
-        version: 5.15.3
+        version: 5.15.1
         platform: gcc_64
 
     - name: QMake
@@ -111,7 +111,7 @@ jobs:
       uses: Skycoder42/action-setup-qt@master
       id: qt
       with:
-        version: 5.15.3
+        version: 5.15.1
         platform: gcc_64
 
     - name: QMake
@@ -166,7 +166,7 @@ jobs:
       uses: Skycoder42/action-setup-qt@master
       id: qt
       with:
-        version: 5.15.3
+        version: 5.15.1
         platform: msvc2019
 
     - name: QMake
