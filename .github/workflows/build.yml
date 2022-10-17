@@ -139,35 +139,35 @@ jobs:
       run: ./build/ci/github_actions/ci.cmd deplibs
       shell: cmd
       env:
-        BE: msvc
+        BE: mingw
 
     - name: Configure
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd configure
       shell: cmd
       env:
-        BE: msvc
+        BE: mingw
 
     - name: Build
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd build
       shell: cmd
       env:
-        BE: msvc
+        BE: mingw
 
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd install
       shell: cmd
       env:
-        BE: msvc
+        BE: mingw
 
     - name: Setup Qt
       uses: Skycoder42/action-setup-qt@master
       id: qt
       with:
         version: 5.15.1
-        platform: msvc2019
+        platform: mingw81_32
 
     - name: QMake
       run: |
@@ -179,5 +179,5 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: launcher-windows-msvc-${{ github.sha }}
+        name: launcher-windows-mingw-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
