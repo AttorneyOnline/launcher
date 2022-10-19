@@ -174,7 +174,7 @@ jobs:
 
     - name: Copy archive.h
       working-directory: ${{github.workspace}}
-      run : "copy ./libs/libarchive/libarchive/archive.h ./libs/QArchive/include"
+      run : "copy .\\libs\\libarchive\\libarchive\\archive.h .\\libs\\QArchive\\include"
       shell: cmd
 
     - name: QMake
