@@ -55,6 +55,14 @@ jobs:
     - name: Upgrade Python
       run: |
         brew install python
+        
+    - name: Copy archive.h
+      working-directory: ${{github.workspace}}
+      run : cp ./libs/libarchive/libarchive/archive.h ./libs/QArchive/include/archive.h
+      
+    - name: Copy archive_entry.h
+      working-directory: ${{github.workspace}}
+      run : cp ./libs/libarchive/libarchive/archive_entry.h ./libs/QArchive/include/archive_entry.h
 
     - name: QMake
       run: |
@@ -175,6 +183,11 @@ jobs:
     - name: Copy archive.h
       working-directory: ${{github.workspace}}
       run : "copy .\\libs\\libarchive\\libarchive\\archive.h .\\libs\\QArchive\\include"
+      shell: cmd
+      
+    - name: Copy archive_entry.h
+      working-directory: ${{github.workspace}}
+      run : "copy .\\libs\\libarchive\\libarchive\\archive_entry.h .\\libs\\QArchive\\include"
       shell: cmd
 
     - name: QMake
