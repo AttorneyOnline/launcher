@@ -172,6 +172,11 @@ jobs:
       env:
         BE: mingw-gcc
 
+    - name: Copy archive.h
+      working-directory: ${{github.workspace}}
+      run : "copy .\libs\libarchive\libarchive\archive.h .\libs\QArchive\include"
+      shell: cmd
+
     - name: QMake
       run: |
         qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation"
