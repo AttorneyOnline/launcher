@@ -77,6 +77,10 @@ jobs:
         name: launcher-macos-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
 
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+
   Ubuntu:
     runs-on: ubuntu-latest
     steps:
@@ -137,6 +141,10 @@ jobs:
       with:
         name: launcher-ubuntu-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
+
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
 
   Windows:
     runs-on: windows-latest
@@ -202,3 +210,7 @@ jobs:
       with:
         name: launcher-windows-mingw-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
+
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
