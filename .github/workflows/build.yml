@@ -25,8 +25,7 @@ jobs:
         platform: clang_64
 
     - name: Install dependencies
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/github_actions/macos.sh prepare
+      run: ${{github.workspace}}/libs/libarchive/build/ci/github_actions/macos.sh prepare
 
     - name: Autogen
       working-directory: ${{github.workspace}}/libs/libarchive/
