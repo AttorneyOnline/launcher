@@ -187,16 +187,14 @@ jobs:
       env:
         BE: mingw-gcc
 
-    - name: Copy archive.h
+    - name: Copy archive
       working-directory: ${{github.workspace}}
-      run : "copy .\\libs\\libarchive\\libarchive\\archive.h .\\libs\\QArchive\\include"
       shell: cmd
+      run: |
+        "copy .\\libs\\libarchive\\libarchive\\archive.h .\\libs\\QArchive\\include"
+        "copy .\\libs\\libarchive\\libarchive\\archive_entry.h .\\libs\\QArchive\\include"
+        "copy .\\libs\\libarchive\\libarchive\\bin\\libarchive.dll .\\libs\\QArchive"
       
-    - name: Copy archive_entry.h
-      working-directory: ${{github.workspace}}
-      run : "copy .\\libs\\libarchive\\libarchive\\archive_entry.h .\\libs\\QArchive\\include"
-      shell: cmd
-
     - name: QMake
       run: |
         qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation"
@@ -209,7 +207,3 @@ jobs:
       with:
         name: launcher-windows-mingw-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
-
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
