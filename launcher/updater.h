@@ -7,8 +7,6 @@
 #include <QObject>
 #include <QString>
 
-#include <bits/unique_ptr.h>
-
 class Updater : public QObject
 {
     Q_OBJECT
