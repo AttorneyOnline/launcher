@@ -27,6 +27,11 @@ jobs:
     - name: Install dependencies
       run: ${{github.workspace}}/libs/libarchive/build/ci/github_actions/macos.sh prepare
 
+    - name: Locate lz4
+      run: |
+        brew info lz4
+        exit 1
+
     - name: Autogen
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/build.sh -a autogen
@@ -54,10 +59,6 @@ jobs:
     - name: Upgrade Python
       run: |
         brew install python
-
-    - name: Install lz4
-      run: |
-        brew install lz4
         
     - name: Copy archive.h
       working-directory: ${{github.workspace}}
