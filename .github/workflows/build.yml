@@ -54,6 +54,10 @@ jobs:
     - name: Upgrade Python
       run: |
         brew install python
+
+    - name: Install lz4
+      run: |
+        brew install lz4
         
     - name: Copy archive.h
       working-directory: ${{github.workspace}}
