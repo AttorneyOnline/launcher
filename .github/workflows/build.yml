@@ -1,0 +1,110 @@
+name: CI build
+
+on: [push, pull_request]
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - 5.15.1
+        platform:
+          - gcc_64
+          - msvc2019
+          - mingw81_32
+          - clang_64
+
+        include:
+          - platform: gcc_64
+            os: ubuntu-latest
+          - platform: msvc2019
+            os: windows-2019
+          - platform: mingw81_32
+            os: windows-latest
+          - platform: clang_64
+            os: macos-latest
+
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@master
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@master
+        with:
+          python-version: '3.10'
+          
+      - name: actions/cache qt
+        uses: actions/cache@master
+        id: cache
+        with:
+          path: qt/${{matrix.version}}/${{matrix.platform}}
+          key: qt-${{matrix.version}}-${{matrix.platform}}
+
+      - name: Add msbuild to PATH
+        if: matrix.platform == 'msvc2019'
+        uses: microsoft/setup-msbuild@main
+        
+      - uses: Skycoder42/action-setup-qt@master
+        id: qt
+        with:
+          version: ${{matrix.version}}
+          platform: ${{matrix.platform}}
+
+      - name: qmake
+        if: matrix.platform != 'android'
+        run: |
+          qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation" CONFIG+=install_ok QT_PLATFORM=${{matrix.platform}}
+
+      - name: build
+        run: |
+          ${{steps.qt.outputs.make}}
+
+      - name: Deploy Windows
+        if: contains(matrix.os, 'windows')
+        working-directory: ${{github.workspace}}/bin/
+        shell: bash
+        run: |
+          windeployqt --no-quick-import --no-translations --no-virtualkeyboard --no-compiler-runtime --no-webkit2 --no-opengl-sw .
+
+      - name: Copy MingW DLL
+        if: matrix.platform == 'mingw81_32'
+        working-directory: ${{github.workspace}}/bin/
+        shell: bash
+        run: |
+          cp D:/a/AO2-Client/AO2-Client/.cache/qt/Tools/mingw810_32/bin/libgcc_s_dw2-1.dll .
+          cp D:/a/AO2-Client/AO2-Client/.cache/qt/Tools/mingw810_32/bin/libstdc++-6.dll .
+          cp D:/a/AO2-Client/AO2-Client/.cache/qt/Tools/mingw810_32/bin/libwinpthread-1.dll .
+
+      - name: Deploy Linux
+        if: matrix.platform == 'gcc_64'
+        working-directory: ${{github.workspace}}/bin/
+        shell: bash
+        run: |
+          cp ../scripts/launch.sh .
+          chmod +x launch.sh
+          chmod +x launcher
+          tar -cf launcher.tar ./*
+          rm -rf imageformats
+          rm *.so
+          rm *.sh
+          rm launcher
+
+      - name: Deploy Mac
+        if: matrix.os == 'macos-latest'
+        working-directory: ${{github.workspace}}/bin/
+        shell: bash
+        run: |
+          macdeployqt launcher.app
+          mv *.dylib ./Launcher.app/Contents/Frameworks
+          hdiutil create -volname "launcher" -srcfolder "./launcher.app" -ov -format UDZO "launcher.dmg"
+          rm -r ./Attorney_Online.app/
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: launcher-${{matrix.os}}-${{matrix.platform}}
+          path: ${{github.workspace}}/bin/
