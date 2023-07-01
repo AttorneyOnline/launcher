@@ -26,7 +26,9 @@ jobs:
         platform: clang_64
 
     - name: Install dependencies
-      run: ${{github.workspace}}/libs/libarchive/build/ci/github_actions/macos.sh prepare
+      run: |
+        ${{github.workspace}}/libs/libarchive/build/ci/github_actions/macos.sh prepare
+        export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix zstd)/lib/
 
     - name: Autogen
       working-directory: ${{github.workspace}}/libs/libarchive/
@@ -70,6 +72,7 @@ jobs:
 
     - name: Make
       run: |
+        export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix zstd)/lib/
         ${{steps.qt.outputs.make}}
 
     - uses: actions/upload-artifact@v3
@@ -192,9 +195,9 @@ jobs:
       working-directory: ${{github.workspace}}
       shell: cmd
       run: |
-        "copy .\\libs\\libarchive\\libarchive\\archive.h .\\libs\\QArchive\\include"
-        "copy .\\libs\\libarchive\\libarchive\\archive_entry.h .\\libs\\QArchive\\include"
-        "copy .\\libs\\libarchive\\libarchive\\bin\\libarchive.dll .\\libs\\QArchive"
+        #"copy .\\libs\\libarchive\\libarchive\\archive.h .\\libs\\QArchive\\include"
+        #"copy .\\libs\\libarchive\\libarchive\\archive_entry.h .\\libs\\QArchive\\include"
+        #"copy .\\libs\\libarchive\\libarchive\\bin\\libarchive.dll .\\libs\\QArchive"
       
     - name: QMake
       run: |
