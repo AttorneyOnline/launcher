@@ -195,9 +195,9 @@ jobs:
       working-directory: ${{github.workspace}}
       shell: cmd
       run: |
-        #"copy .\\libs\\libarchive\\libarchive\\archive.h .\\libs\\QArchive\\include"
-        #"copy .\\libs\\libarchive\\libarchive\\archive_entry.h .\\libs\\QArchive\\include"
-        #"copy .\\libs\\libarchive\\libarchive\\bin\\libarchive.dll .\\libs\\QArchive"
+        rem "copy .\\libs\\libarchive\\libarchive\\archive.h .\\libs\\QArchive\\include"
+        rem "copy .\\libs\\libarchive\\libarchive\\archive_entry.h .\\libs\\QArchive\\include"
+        rem "copy .\\libs\\libarchive\\libarchive\\bin\\libarchive.dll .\\libs\\QArchive"
       
     - name: QMake
       run: |
