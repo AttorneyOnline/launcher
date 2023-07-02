@@ -83,6 +83,7 @@ jobs:
     - name: Setup tmate session
       if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 15
 
   Ubuntu:
     runs-on: ubuntu-latest
@@ -148,6 +149,7 @@ jobs:
     - name: Setup tmate session
       if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 15
 
   Windows:
     runs-on: windows-latest
@@ -211,3 +213,8 @@ jobs:
       with:
         name: launcher-windows-mingw-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
+    
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 15
