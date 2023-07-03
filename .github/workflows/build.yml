@@ -17,6 +17,12 @@ jobs:
     - uses: actions/setup-python@master
       with:
         python-version: '3.10'
+        
+    - name: Brew
+      run: |
+        brew update
+        brew upgrade
+        brew install python nettle
 
     - name: Setup Qt
       uses: Skycoder42/action-setup-qt@master
@@ -54,14 +60,6 @@ jobs:
       env:
         BS: cmake
 
-    - name: Upgrade Python
-      run: |
-        brew install python
-        
-    - name: Install libnettle
-      run: |
-        brew install nettle
-        
     - name: Copy archive.h
       working-directory: ${{github.workspace}}
       run : cp ./libs/libarchive/libarchive/archive.h ./libs/QArchive/include/archive.h
