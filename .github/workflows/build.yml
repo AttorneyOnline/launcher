@@ -75,6 +75,7 @@ jobs:
     - name: Make
       run: |
         export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix zstd)/lib/
+        export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix nettle)/lib/
         ${{steps.qt.outputs.make}}
 
     - uses: actions/upload-artifact@v3
