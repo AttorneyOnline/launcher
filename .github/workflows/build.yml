@@ -18,10 +18,10 @@ jobs:
       with:
         python-version: '3.10'
         
-    - name: Brew
+    - name: Unfuck Brew
       run: |
-        brew untap homebrew/homebrew-cask-drivers
-        brew reinstall cask
+        cd  cd /usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask
+        git pull
         brew install nettle        
 
     - name: Setup Qt
