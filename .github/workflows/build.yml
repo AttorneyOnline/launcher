@@ -20,7 +20,9 @@ jobs:
         
     - name: Brew
       run: |
-        brew install nettle
+        brew untap homebrew/homebrew-cask-drivers
+        brew reinstall cask
+        brew install nettle        
 
     - name: Setup Qt
       uses: Skycoder42/action-setup-qt@master
@@ -200,7 +202,7 @@ jobs:
         cp ./libs/libarchive/libarchive/archive.h ./libs/QArchive/include/
         cp ./libs/libarchive/libarchive/archive_entry.h ./libs/QArchive/include/
         cp ./libs/libarchive/build_ci/cmake/bin/libarchive.dll ./libs/QArchive/
-        cp ./libs/libarchive/build_ci/cmake/libarchive.dll.a ./libs/QArchive/
+        cp ./libs/libarchive/build_ci/cmake/libarchive/libarchive.dll.a ./libs/QArchive/
       
     - name: QMake
       run: |
