@@ -77,6 +77,16 @@ jobs:
         export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix zstd)/lib/
         export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix nettle)/lib/
         ${{steps.qt.outputs.make}}
+        
+    
+    - name: Deploy Mac
+      if: matrix.os == 'macos-latest'
+      working-directory: ${{github.workspace}}/launcher/bin/
+      shell: bash
+      run: |
+        macdeployqt launcher.app
+        hdiutil create -volname "AO Launcher" -srcfolder "./launcher.app" -ov -format UDZO "launcher.dmg"
+        rm -r ./launcher.app/
 
     - uses: actions/upload-artifact@v3
       with:
@@ -201,6 +211,7 @@ jobs:
         qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation"
 
     - name: Make
+      shell: bash
       run: |
         export LIBRARY_PATH="C:/Program Files (x86)/libarchive/lib/"
         export INCLUDE="C:/Program Files (x86)/libarchive/include/"
