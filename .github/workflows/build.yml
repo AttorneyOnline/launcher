@@ -58,6 +58,10 @@ jobs:
       run: |
         brew install python
         
+    - name: Install libnettle
+      run: |
+        brew install nettle
+        
     - name: Copy archive.h
       working-directory: ${{github.workspace}}
       run : cp ./libs/libarchive/libarchive/archive.h ./libs/QArchive/include/archive.h
@@ -197,9 +201,9 @@ jobs:
       working-directory: ${{github.workspace}}
       shell: cmd
       run: |
-        rem "copy .\\libs\\libarchive\\libarchive\\archive.h .\\libs\\QArchive\\include"
-        rem "copy .\\libs\\libarchive\\libarchive\\archive_entry.h .\\libs\\QArchive\\include"
-        rem "copy .\\libs\\libarchive\\libarchive\\bin\\libarchive.dll .\\libs\\QArchive"
+        cp ./libs/libarchive/libarchive/archive.h ./libs/QArchive/include/
+        cp ./libs/libarchive/libarchive/archive_entry.h ./libs/QArchive/include/
+        cp ./libs/libarchive/build_ci/cmake/bin/libarchive.dll ./libs/QArchive/
       
     - name: QMake
       run: |
