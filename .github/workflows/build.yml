@@ -20,9 +20,7 @@ jobs:
         
     - name: Brew
       run: |
-        brew update
-        brew upgrade
-        brew install python nettle
+        brew install nettle
 
     - name: Setup Qt
       uses: Skycoder42/action-setup-qt@master
