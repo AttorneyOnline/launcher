@@ -20,7 +20,7 @@ jobs:
         
     - name: Unfuck Brew
       run: |
-        cd  cd /usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask
+        cd /usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask
         git pull
         brew install nettle        
 
