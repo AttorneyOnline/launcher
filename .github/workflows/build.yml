@@ -196,21 +196,14 @@ jobs:
       env:
         BE: mingw-gcc
 
-    - name: Copy archive
-      working-directory: ${{github.workspace}}
-      shell: cmd
-      run: |
-        cp ./libs/libarchive/libarchive/archive.h ./libs/QArchive/include/
-        cp ./libs/libarchive/libarchive/archive_entry.h ./libs/QArchive/include/
-        cp ./libs/libarchive/build_ci/cmake/bin/libarchive.dll ./libs/QArchive/
-        cp ./libs/libarchive/build_ci/cmake/libarchive/libarchive.dll.a ./libs/QArchive/
-      
     - name: QMake
       run: |
         qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation"
 
     - name: Make
       run: |
+        export LIBRARY_PATH=$LIBRARY_PATH:C:/Program Files (x86)/libarchive/lib/
+        export INCLUDE=$INCLUDE:C:/Program Files (x86)/libarchive/include/
         ${{steps.qt.outputs.make}}
 
     - uses: actions/upload-artifact@v3
