@@ -202,8 +202,8 @@ jobs:
 
     - name: Make
       run: |
-        export LIBRARY_PATH=$LIBRARY_PATH:"C:/Program Files (x86)/libarchive/lib/"
-        export INCLUDE=$INCLUDE:"C:/Program Files (x86)/libarchive/include/"
+        export LIBRARY_PATH="C:/Program Files (x86)/libarchive/lib/"
+        export INCLUDE="C:/Program Files (x86)/libarchive/include/"
         ${{steps.qt.outputs.make}}
 
     - uses: actions/upload-artifact@v3
