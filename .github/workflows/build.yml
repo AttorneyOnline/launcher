@@ -202,6 +202,7 @@ jobs:
         cp ./libs/libarchive/libarchive/archive.h ./libs/QArchive/include/
         cp ./libs/libarchive/libarchive/archive_entry.h ./libs/QArchive/include/
         cp ./libs/libarchive/build_ci/cmake/bin/libarchive.dll ./libs/QArchive/
+        cp ./libs/libarchive/build_ci/cmake/libarchive.dll.a ./libs/QArchive/
       
     - name: QMake
       run: |
