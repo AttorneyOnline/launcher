@@ -208,7 +208,7 @@ jobs:
 
     - name: QMake
       run: |
-        qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation" INCLUDEPATH+="C:/Progra~2/libarchive/include/" LIBS+="C:/Progra~2/libarchive/lib/"
+        qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation" INCLUDEPATH+="C:/Progra~2/libarchive/include/" LIBS+="-LC:/Progra~2/libarchive/lib/"
 
     - name: Make
       shell: bash
