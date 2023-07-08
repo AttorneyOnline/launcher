@@ -208,12 +208,12 @@ jobs:
 
     - name: QMake
       run: |
-        qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation"
+        qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation" INCLUDEPATH+="/c/Program\ Files\ (x86)/libarchive/include/" LIBS+="/c/Program\ Files\ (x86)/libarchive/lib/"
 
     - name: Make
       shell: bash
       run: |
-        LIBRARY_PATH="C:\\Program\ Files\ (x86)\\libarchive\\lib\\" CPLUS_INCLUDE_PATH="C:\\Program\ Files\ (x86)\\libarchive\\include\\" ${{steps.qt.outputs.make}}        
+        ${{steps.qt.outputs.make}}        
 
     - uses: actions/upload-artifact@v3
       with:
