@@ -36,7 +36,8 @@ SOURCES += \
     updater.cpp \
     runtimeerror.cpp \
     installnotice.cpp \
-    installprogress.cpp
+    installprogress.cpp \
+    aria2client.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -45,7 +46,8 @@ HEADERS += \
     runtimeerror.h \
     task.h \
     installnotice.h \
-    installprogress.h
+    installprogress.h \
+    aria2client.h
 
 FORMS += \
     mainwindow.ui \
@@ -61,5 +63,9 @@ QT += concurrent
 
 LIBS += ../libs/QArchive/libQArchive.a -larchive -lbz2 -llzma -llz4 -lz -lzstd -lnettle -lexpat -lxml2
 win32:LIBS += -lbcrypt -liconv
+LIBS += -L../libs/aria2/release/lib -laria2
 
 INCLUDEPATH += ../libs/QArchive ../libs/QArchive/include
+INCLUDEPATH += ../libs/aria2/src/includes/ ../libs/aria2/src/
+
+
