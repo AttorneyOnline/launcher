@@ -213,7 +213,7 @@ jobs:
     - name: Make
       shell: bash
       run: |
-        LDFLAGS="-LC:\\Program\ Files\ (x86)\\libarchive\\lib\\" CFLAGS="-IC:\\Program\ Files\ (x86)\\libarchive\\include\\" ${{steps.qt.outputs.make}}        
+        LIBRARY_PATH="C:\\Program\ Files\ (x86)\\libarchive\\lib\\" CPLUS_INCLUDE_PATH="C:\\Program\ Files\ (x86)\\libarchive\\include\\" ${{steps.qt.outputs.make}}        
 
     - uses: actions/upload-artifact@v3
       with:
