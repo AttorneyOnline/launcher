@@ -48,12 +48,6 @@ jobs:
       env:
         BS: cmake
 
-    - name: Build
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/build.sh -a build
-      env:
-        BS: cmake
-
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/build.sh -a install
@@ -128,21 +122,9 @@ jobs:
         BS: cmake
         CRYPTO: mbedtls
 
-    - name: Build
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/build.sh -a build
-      env:
-        BS: cmake
-
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/build.sh -a install
-      env:
-        BS: cmake
-
-    - name: Artifact
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/build.sh -a artifact
       env:
         BS: cmake
 
@@ -192,13 +174,6 @@ jobs:
       env:
         BE: mingw-gcc
 
-    - name: Build
-      working-directory: ${{github.workspace}}/libs/libarchive/
-      run: ./build/ci/github_actions/ci.cmd build
-      shell: cmd
-      env:
-        BE: mingw-gcc
-
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd install
@@ -208,7 +183,7 @@ jobs:
 
     - name: QMake
       run: |
-        qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation" INCLUDEPATH+="C:/Progra~2/libarchive/include/" LIBS+="-LC:/Progra~2/libarchive/lib/"
+        qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation" INCLUDEPATH+="C:/Progra~2/libarchive/include/" LIBS+="-LC:/Progra~2/libarchive/lib/" LIBS+="-LC:/Progra~2/libarchive/bin/"
 
     - name: Make
       shell: bash
