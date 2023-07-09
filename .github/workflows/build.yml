@@ -34,6 +34,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        conan profile new mynewprofile --detect
         conan install .
 
     - name: QMake
@@ -84,6 +85,7 @@ jobs:
     - name: Conan
       run: |
         pip install conan
+        conan profile new mynewprofile --detect
         conan install .
 
     - name: QMake
@@ -121,6 +123,7 @@ jobs:
     - name: Conan
       run: |
         pip install conan
+        conan profile new mynewprofile --detect
         conan install .
 
     - name: QMake
