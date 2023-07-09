@@ -1,0 +1,143 @@
+name: CI
+
+on: [push, pull_request]
+
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+jobs:
+  MacOS:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: recursive
+
+    - uses: actions/setup-python@master
+      with:
+        python-version: '3.10'
+        
+    - name: Unfuck Brew
+      run: |
+        cd /usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask
+        git pull
+        brew install nettle
+        brew install conan
+
+    - name: Setup Qt
+      uses: Skycoder42/action-setup-qt@master
+      id: qt
+      with:
+        version: 5.15.1
+        platform: clang_64
+
+    - name: Install dependencies
+      run: |
+        conan install .
+
+    - name: QMake
+      run: |
+        qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation"
+
+    - name: Make
+      run: |
+        ${{steps.qt.outputs.make}}
+        
+    
+    - name: Deploy Mac
+      if: matrix.os == 'macos-latest'
+      working-directory: ${{github.workspace}}/launcher/bin/
+      shell: bash
+      run: |
+        macdeployqt launcher.app
+        hdiutil create -volname "AO Launcher" -srcfolder "./launcher.app" -ov -format UDZO "launcher.dmg"
+        rm -r ./launcher.app/
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: launcher-macos-${{ github.sha }}
+        path: ${{ github.workspace }}/launcher/bin/
+
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 15
+
+  Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: recursive
+
+    - name: Setup Qt
+      uses: Skycoder42/action-setup-qt@master
+      id: qt
+      with:
+        version: 5.15.1
+        platform: gcc_64
+
+    - name: Install dependencies
+      run: sudo apt-get install -y autoconf automake build-essential cmake git libarchive-dev libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
+
+    - name: Conan
+      run: |
+        pip install conan
+        conan install .
+
+    - name: QMake
+      run: |
+        qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation"
+
+    - name: Make
+      run: |
+        ${{steps.qt.outputs.make}}
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: launcher-ubuntu-${{ github.sha }}
+        path: ${{ github.workspace }}/launcher/bin/
+
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 15
+
+  Windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: recursive
+
+    - name: Setup Qt
+      uses: Skycoder42/action-setup-qt@master
+      id: qt
+      with:
+        version: 5.15.1
+        platform: mingw81_32
+
+    - name: Conan
+      run: |
+        pip install conan
+        conan install .
+
+    - name: QMake
+      run: |
+        qmake QMAKE_CXXFLAGS+="-fno-sized-deallocation" INCLUDEPATH+="C:/Progra~2/libarchive/include/" LIBS+="-LC:/Progra~2/libarchive/lib/" LIBS+="-LC:/Progra~2/libarchive/bin/"
+
+    - name: Make
+      shell: bash
+      run: |
+        ${{steps.qt.outputs.make}}        
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: launcher-windows-mingw-${{ github.sha }}
+        path: ${{ github.workspace }}/launcher/bin/
+    
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 15

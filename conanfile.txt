@@ -1,0 +1,7 @@
+[requires]
+qarchive/2.2.4
+
+[generators]
+qmake
+
+[options]
