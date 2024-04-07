@@ -24,12 +24,13 @@ jobs:
         git pull
         brew install nettle        
 
-    - name: Setup Qt
-      uses: Skycoder42/action-setup-qt@master
+    - uses: jurplel/install-qt-action@v3
       id: qt
       with:
         version: 5.15.1
-        platform: clang_64
+        target: desktop
+        cache: true
+        cache-key-prefix: qt
 
     - name: Install dependencies
       run: |
@@ -99,12 +100,13 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup Qt
-      uses: Skycoder42/action-setup-qt@master
+    - uses: jurplel/install-qt-action@v3
       id: qt
       with:
         version: 5.15.1
-        platform: gcc_64
+        target: desktop
+        cache: true
+        cache-key-prefix: qt
 
     - name: Install dependencies
       run: sudo apt-get install -y autoconf automake build-essential cmake git libarchive-dev libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
@@ -153,12 +155,15 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup Qt
-      uses: Skycoder42/action-setup-qt@master
+    - uses: jurplel/install-qt-action@v3
       id: qt
       with:
         version: 5.15.1
-        platform: mingw81_64
+        target: desktop
+        arch: win32_mingw81
+        tools: 'tools_mingw,qt.tools.win32_mingw810'
+        cache: true
+        cache-key-prefix: qt
 
     - name: Install dependencies
       working-directory: ${{github.workspace}}/libs/libarchive/
