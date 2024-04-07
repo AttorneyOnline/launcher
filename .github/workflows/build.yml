@@ -158,7 +158,7 @@ jobs:
       id: qt
       with:
         version: 5.15.1
-        platform: mingw81_32
+        platform: mingw81_64
 
     - name: Install dependencies
       working-directory: ${{github.workspace}}/libs/libarchive/
