@@ -67,7 +67,7 @@ jobs:
       run: |
         export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix zstd)/lib/
         export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix nettle)/lib/
-        ${{steps.qt.outputs.make}}
+        make
         
     
     - name: Deploy Mac
@@ -125,7 +125,7 @@ jobs:
 
     - name: Make
       run: |
-        ${{steps.qt.outputs.make}}
+        make
 
     - uses: actions/upload-artifact@v3
       with:
@@ -173,7 +173,7 @@ jobs:
     - name: Make
       shell: bash
       run: |
-        ${{steps.qt.outputs.make}}        
+        nmake      
 
     - uses: actions/upload-artifact@v3
       with:
