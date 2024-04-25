@@ -80,11 +80,6 @@ jobs:
         name: launcher-macos-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
 
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 15
-
   Ubuntu:
     runs-on: ubuntu-latest
     steps:
@@ -133,11 +128,6 @@ jobs:
         name: launcher-ubuntu-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
 
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 15
-
   Windows:
     runs-on: windows-latest
     steps:
@@ -166,6 +156,7 @@ jobs:
       shell: cmd
       env:
         BE: mingw-gcc
+        CMAKE_MAKE_PROGRAM: make.exe
 
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
@@ -187,8 +178,3 @@ jobs:
       with:
         name: launcher-windows-mingw-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
-    
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 15
