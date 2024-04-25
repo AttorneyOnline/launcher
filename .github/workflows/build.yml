@@ -27,8 +27,6 @@ jobs:
     - uses: jurplel/install-qt-action@v3
       id: qt
       with:
-        version: 5.15.1
-        target: desktop
         cache: true
         cache-key-prefix: qt
 
@@ -103,8 +101,6 @@ jobs:
     - uses: jurplel/install-qt-action@v3
       id: qt
       with:
-        version: 5.15.1
-        target: desktop
         cache: true
         cache-key-prefix: qt
 
@@ -158,8 +154,6 @@ jobs:
     - uses: jurplel/install-qt-action@v3
       id: qt
       with:
-        version: 5.15.1
-        target: desktop
         arch: win32_mingw81
         tools: 'tools_mingw,qt.tools.win32_mingw810'
         cache: true
