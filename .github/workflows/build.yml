@@ -138,8 +138,6 @@ jobs:
     - uses: jurplel/install-qt-action@v3
       id: qt
       with:
-        arch: win32_mingw81
-        tools: 'tools_mingw,qt.tools.win32_mingw810'
         cache: true
         cache-key-prefix: qt
 
@@ -148,22 +146,21 @@ jobs:
       run: ./build/ci/github_actions/ci.cmd deplibs
       shell: cmd
       env:
-        BE: mingw-gcc
+        BE: msvc
 
     - name: Configure
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd configure
       shell: cmd
       env:
-        BE: mingw-gcc
-        CMAKE_MAKE_PROGRAM: make.exe
+        BE: msvc
 
     - name: Install
       working-directory: ${{github.workspace}}/libs/libarchive/
       run: ./build/ci/github_actions/ci.cmd install
       shell: cmd
       env:
-        BE: mingw-gcc
+        BE: msvc
 
     - name: QMake
       run: |
@@ -176,5 +173,5 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: launcher-windows-mingw-${{ github.sha }}
+        name: launcher-windows-msvc-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
