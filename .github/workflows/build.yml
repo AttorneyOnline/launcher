@@ -18,12 +18,6 @@ jobs:
       with:
         python-version: '3.10'
         
-    - name: Unfuck Brew
-      run: |
-        cd /usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask
-        git pull
-        brew install nettle        
-
     - uses: jurplel/install-qt-action@v3
       id: qt
       with:
@@ -98,14 +92,14 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Install dependencies
+      run: sudo apt-get install -y autoconf automake build-essential cmake git libarchive-dev libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
+
     - uses: jurplel/install-qt-action@v3
       id: qt
       with:
         cache: true
         cache-key-prefix: qt
-
-    - name: Install dependencies
-      run: sudo apt-get install -y autoconf automake build-essential cmake git libarchive-dev libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
 
     - name: Autogen
       working-directory: ${{github.workspace}}/libs/libarchive/
