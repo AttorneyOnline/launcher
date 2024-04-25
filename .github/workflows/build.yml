@@ -8,7 +8,7 @@ env:
 
 jobs:
   MacOS:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
     - uses: actions/checkout@master
       with:
@@ -18,7 +18,7 @@ jobs:
       with:
         python-version: '3.10'
         
-    - uses: jurplel/install-qt-action@v3
+    - uses: jurplel/install-qt-action@master
       id: qt
       with:
         cache: true
@@ -90,7 +90,7 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get install -y autoconf automake build-essential cmake git libarchive-dev libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
 
-    - uses: jurplel/install-qt-action@v3
+    - uses: jurplel/install-qt-action@master
       id: qt
       with:
         cache: true
@@ -135,7 +135,7 @@ jobs:
       with:
         submodules: recursive
 
-    - uses: jurplel/install-qt-action@v3
+    - uses: jurplel/install-qt-action@master
       id: qt
       with:
         cache: true
