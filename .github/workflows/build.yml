@@ -18,10 +18,6 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Setup VC
-      run: |
-        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
-        
     - uses: jurplel/install-qt-action@v3
       id: qt
       with:
@@ -138,6 +134,10 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: recursive
+
+    - name: Setup VC
+      run: |
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
 
     - uses: jurplel/install-qt-action@v3
       id: qt
