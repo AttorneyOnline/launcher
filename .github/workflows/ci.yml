@@ -1,0 +1,51 @@
+name: CI Build
+
+jobs:
+  formatting-check:
+    name: formatting-check
+    runs-on: ubuntu-latest
+    steps:
+     - uses: actions/checkout@v4
+     - name: Run clang-format style check for C++
+       uses: jidicula/clang-format-action@v4.12.0
+       with:
+         clang-format-version: '17'
+         check-path: 'src'
+         fallback-style: LLVM
+
+  build-windows:
+    needs: formatting-check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          submodules: recursive
+      
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.5.3
+          target: desktop
+          arch: win64_msvc2019_64
+          cache: true
+          cache-key-prefix: install-qt-action
+
+      - name: Configure MSVC (Windows)
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build
+        run: |
+          cmake . -D CMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
+
+      - name: Deploy Windows
+        working-directory: ${{github.workspace}}/bin/
+        shell: bash
+        run: |
+          windeployqt--no-translations --no-compiler-runtime --no-opengl-sw ./launcher.exe
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: Attorney_Launcher-Windows
+          path: ${{github.workspace}}/bin

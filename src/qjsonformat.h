@@ -70,24 +70,20 @@ void parseJsonArray(const QJsonArray &array, QStringList key, QSettings::Setting
   for (int i = 0; i < array_size; i++)
   {
     QJsonValue element = array.at(i);
+    QStringList t_key = key;
+    t_key.append(QString::number(i + 1));
     if (element.isObject())
     {
-      QStringList t_key = key;
-      t_key.append(QString::number(i + 1));
       const QJsonObject obj = element.toObject();
       parseJsonObject(obj, t_key, map);
     }
     else if (element.isArray())
     {
-      QStringList t_key = key;
-      t_key.append(QString::number(i + 1));
       const QJsonArray arr = element.toArray();
       parseJsonArray(arr, t_key, map);
     }
     else
     {
-      QStringList t_key = key;
-      t_key.append(QString::number(i + 1));
       map.insert(t_key.join("/"), convertToVariant(element));
     }
   }
