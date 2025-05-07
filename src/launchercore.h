@@ -11,7 +11,7 @@ class LauncherCore : public QObject
 {
   Q_OBJECT
 public:
-  LauncherCore(Launcher::Settings* f_settings = nullptr, QObject *parent = nullptr);
+  LauncherCore(Launcher::Settings *f_settings = nullptr, QObject *parent = nullptr);
   ~LauncherCore() = default;
 
   QNetworkAccessManager *net_man;

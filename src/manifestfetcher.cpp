@@ -1,8 +1,8 @@
 #include "manifestfetcher.h"
 
 #include <QNetworkAccessManager>
-#include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QNetworkRequest>
 
 ManifestFetcher::ManifestFetcher(QString f_user_agent, QNetworkAccessManager *f_net_man, QObject *parent)
     : QObject{parent}
@@ -25,7 +25,6 @@ void ManifestFetcher::onReplyReady(QNetworkReply *reply)
   QScopedPointer<QNetworkReply> data(reply);
   QNetworkReply::NetworkError error = data->error();
 
-  if (error != QNetworkReply::NoError) {
-
-  }
+  if (error != QNetworkReply::NoError)
+  {}
 }

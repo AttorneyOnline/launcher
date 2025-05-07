@@ -1,8 +1,8 @@
 #include <QGuiApplication>
 
 #include "launchercore.h"
-#include "version.h"
 #include "settings.h"
+#include "version.h"
 
 int main(int argc, char *argv[])
 {

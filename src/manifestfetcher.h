@@ -15,7 +15,6 @@ public:
 
 Q_SIGNALS:
 
-
 private Q_SLOTS:
   void onReplyReady(QNetworkReply *reply);
 
