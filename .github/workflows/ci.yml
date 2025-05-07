@@ -44,7 +44,7 @@ jobs:
         working-directory: ${{github.workspace}}/bin/
         shell: bash
         run: |
-          windeployqt--no-translations --no-compiler-runtime --no-opengl-sw ./launcher.exe
+          windeployqt --no-translations --no-compiler-runtime --no-opengl-sw ./launcher.exe
 
       - name: Upload Artifact
         uses: actions/upload-artifact@master
