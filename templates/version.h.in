@@ -1,0 +1,28 @@
+#pragma once
+
+#include <QString>
+
+namespace Launcher
+{
+
+static QString organisation()
+{
+  return QStringLiteral("@LAUNCHER_ORGANISATION");
+}
+
+static QString name()
+{
+  return QStringLiteral("@LAUNCHER_NAME@");
+}
+
+static QString version()
+{
+  return QStringLiteral("@LAUNCHER_VERSION@");
+}
+
+static QString userAgent()
+{
+  return QStringLiteral("@LAUNCHER_NAME@/@LAUNCHER_VERSION@");
+}
+
+}; // namespace Launcher
