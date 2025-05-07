@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>res/install_notice.html</file>
-        <file>res/fugue-arrow-circle-315.png</file>
-        <file>res/logo.png</file>
-    </qresource>
-</RCC>
