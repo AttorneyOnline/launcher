@@ -8,7 +8,10 @@ ManifestFetcher::ManifestFetcher(QString f_user_agent, QNetworkAccessManager *f_
     : QObject{parent}
     , agent{f_user_agent}
     , net_man{f_net_man}
-{}
+{
+  qDebug() << "[CTOR]::MANIFESTFETCHER:CREATED OBJECT AT" << this;
+  qDebug() << "[CTOR]::MANIFESTFETCHER:USING QNetworkAccessManager at" << net_man;
+}
 
 void ManifestFetcher::fetch(QString url)
 {

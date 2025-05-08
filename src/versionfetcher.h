@@ -1,19 +1,16 @@
 #pragma once
 
 #include <QObject>
+#include <QVersionNumber>
 
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class ManifestFetcher : public QObject
+class VersionFetcher : public QObject
 {
   Q_OBJECT
 public:
-  ManifestFetcher(QString f_user_agent, QNetworkAccessManager *f_net_man = nullptr, QObject *parent = nullptr);
-
-  void fetch(QString url);
-
-Q_SIGNALS:
+  explicit VersionFetcher(QString f_user_agent, QNetworkAccessManager *f_net_man = nullptr, QObject *parent = nullptr);
 
 private Q_SLOTS:
   void onReplyReady(QNetworkReply *reply);
@@ -21,4 +18,6 @@ private Q_SLOTS:
 private:
   const QString agent;
   QNetworkAccessManager *net_man;
+
+  QVersionNumber version;
 };

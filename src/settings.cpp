@@ -5,14 +5,17 @@
 #include <QSettings>
 
 Launcher::Settings::Settings(QString f_organisation, QString f_application, QObject *parent)
-    : QObject{parent}
+    : QObject{parent}, config{new QSettings("config.json", QJsonFormat::JsonFormat, this)}
 {
-  const QSettings::Format JsonFormat = QSettings::registerFormat("json", &QJsonFormat::readJsonFile, &QJsonFormat::writeJsonFile);
+  qDebug() << "[CTOR]::LAUNCHER::SETTINGS: CREATED OBJECT AT" << this;
+}
 
-  QSettings userConfig("config.json", JsonFormat, this);
-  qDebug() << userConfig.allKeys();
-  qDebug() << userConfig.value("foo/1");
-  qDebug() << userConfig.value("foo/2");
+const QString Launcher::Settings::getClientVersionEndpoint() const
+{
+  const QString VERSION_ENDPOINT = "https://servers.aceattorneyonline.com/version";
+  return config->value("network/version", VERSION_ENDPOINT).toString();
+}
 
-  userConfig.sync();
+void Launcher::Settings::setClientVersionEndpoint()
+{
 }

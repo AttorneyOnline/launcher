@@ -130,4 +130,6 @@ bool writeJsonFile(QIODevice &device, const QSettings::SettingsMap &map)
   return true;
 }
 
+const static QSettings::Format JsonFormat = QSettings::registerFormat("json", &QJsonFormat::readJsonFile, &QJsonFormat::writeJsonFile);
+
 }; // namespace QJsonFormat
