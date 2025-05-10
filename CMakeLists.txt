@@ -19,10 +19,10 @@ add_executable(launcher
   src/main.cpp
   src/version.h
   src/launchercore.h src/launchercore.cpp
-  src/manifestfetcher.h src/manifestfetcher.cpp
   src/settings.h src/settings.cpp
   src/qjsonformat.h
-  src/versionfetcher.h src/versionfetcher.cpp
+  src/webaccess.h src/webaccess.cpp
+  src/datatypes.h
 )
 target_link_libraries(launcher Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
 

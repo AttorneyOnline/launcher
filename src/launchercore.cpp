@@ -1,10 +1,17 @@
 #include "launchercore.h"
 #include "settings.h"
+#include "webaccess.h"
+
+#include "version.h"
 
 #include <QNetworkAccessManager>
 
-LauncherCore::LauncherCore(Launcher::Settings *f_settings, QObject *parent)
+Launcher::LauncherCore::LauncherCore(QNetworkAccessManager *f_net_man, Launcher::Settings *f_settings, QObject *parent)
     : QObject{parent}
-    , net_man{new QNetworkAccessManager(this)}
-    , settings{}
-{}
+    , webaccess(new Launcher::WebAccess(Launcher::userAgent(), f_settings, f_net_man, this))
+    , settings{f_settings}
+{
+  webaccess->fetch(Endpoint::CLIENTVERSION);
+  webaccess->fetch(Endpoint::LAUNCHERVERSION);
+  webaccess->fetch(Endpoint::MEDIAREPOSITORY);
+}

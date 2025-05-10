@@ -32,7 +32,7 @@ InsertTrailingCommas: Wrapped
 KeepEmptyLinesAtTheStartOfBlocks: false
 LambdaBodyIndentation: OuterScope
 MaxEmptyLinesToKeep: 1
-NamespaceIndentation: None
+NamespaceIndentation: All
 PackConstructorInitializers: Never
 PointerAlignment: Right
 QualifierAlignment: Left

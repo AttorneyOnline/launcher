@@ -1,40 +1,34 @@
 #pragma once
 
+#include "datatypes.h"
 #include <QObject>
 
 class QSettings;
 
 namespace Launcher
 {
-class Settings : public QObject
-{
-  Q_OBJECT
-public:
-  explicit Settings(QString f_organisation, QString f_application, QObject *parent = nullptr);
+  class Settings : public QObject
+  {
+    Q_OBJECT
+  public:
+    explicit Settings(QString f_organisation, QString f_application, QObject *parent = nullptr);
 
-  // Network Settings
-  const QString getLauncherVersionEndpoint() const;
-  void setLauncherVersionEndpoint(const QString &endpoint);
+    const QString getEndpoint(Endpoint endpoint) const;
+    void setEndpoint(Endpoint endpoint, const QString &url);
 
-  const QString getClientVersionEndpoint() const;
-  void setClientVersionEndpoint(const QString &endpoint);
+    // User Settings
+    QString applicationInstallPath();
+    void setApplicationInstallPath(const QString &directory);
 
-  const QString getMediaEndpoint() const;
-  void setMediaEndpoint(const QString &endpoint);
+    QString mediaInstallationPath();
+    void setMediaInstallationPath(const QString &directory);
 
-  // User Settings
-  QString applicationInstallPath();
-  void setApplicationInstallPath(const QString &directory);
+    bool checkForUpdateOnLaunch() const;
+    void setCheckForUpdateOnLaunch(bool state);
 
-  QString mediaInstallationPath();
-  void setMediaInstallationPath(const QString &directory);
+    void reset();
 
-  bool checkForUpdateOnLaunch() const;
-  void setCheckForUpdateOnLaunch(bool state);
-
-  void reset();
-
-private:
-  QSettings *config;
-};
+  private:
+    QSettings *config;
+  };
 } // namespace Launcher

@@ -1,20 +1,30 @@
 #pragma once
 
-#include "settings.h"
-
 #include <QObject>
+#include <QVersionNumber>
 
-class ManifestFetcher;
 class QNetworkAccessManager;
 
-class LauncherCore : public QObject
+namespace Launcher
 {
-  Q_OBJECT
-public:
-  LauncherCore(Launcher::Settings *f_settings = nullptr, QObject *parent = nullptr);
-  ~LauncherCore() = default;
+  class Settings;
+  class WebAccess;
+} // namespace Launcher
 
-  QNetworkAccessManager *net_man;
-  ManifestFetcher *fetcher;
-  Launcher::Settings *settings;
-};
+namespace Launcher
+{
+  class LauncherCore : public QObject
+  {
+    Q_OBJECT
+  public:
+    LauncherCore(QNetworkAccessManager *f_net_man = nullptr, Launcher::Settings *f_settings = nullptr, QObject *parent = nullptr);
+    ~LauncherCore() = default;
+
+  private:
+    WebAccess *webaccess;
+    Settings *settings;
+
+    QVersionNumber client_target_version;
+    QVersionNumber launcher_target_version;
+  };
+}; // namespace Launcher
