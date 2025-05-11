@@ -30,7 +30,7 @@ jobs:
           target: desktop
           arch: win64_msvc2019_64
           cache: true
-          cache-key-prefix: install-qt-action-windows
+          cache-key-prefix: install-qt-action
 
       - name: Configure MSVC (Windows)
         uses: ilammy/msvc-dev-cmd@v1
@@ -67,7 +67,7 @@ jobs:
           target: desktop
           arch: gcc_64
           cache: true
-          cache-key-prefix: install-qt-action-linux
+          cache-key-prefix: install-qt-action
 
       - name: Build
         run: |
