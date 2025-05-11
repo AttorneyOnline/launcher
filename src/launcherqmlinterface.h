@@ -9,6 +9,7 @@ namespace Launcher
   {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Because I say so.")
 
   public:
     LauncherQMLInterface();
