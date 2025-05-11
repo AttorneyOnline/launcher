@@ -53,28 +53,28 @@ jobs:
           path: ${{github.workspace}}/bin
 
   build-linux:
-  needs: formatting-check
-  steps:
-    - uses: actions/checkout@master
-      with:
-        submodules: recursive
+    needs: formatting-check
+    steps:
+      - uses: actions/checkout@master
+        with:
+          submodules: recursive
 
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: 6.5.3
-        target: desktop
-        arch: gcc_64
-        cache: true
-        cache-key-prefix: install-qt-action-linux
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.5.3
+          target: desktop
+          arch: gcc_64
+          cache: true
+          cache-key-prefix: install-qt-action-linux
 
-    - name: Build
-      run: |
-        cmake .
-        cmake --build . --config Release
+      - name: Build
+        run: |
+          cmake .
+          cmake --build . --config Release
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@master
-      with:
-        name: Attorney_Launcher-Windows
-        path: ${{github.workspace}}/bin
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: Attorney_Launcher-Windows
+          path: ${{github.workspace}}/bin
