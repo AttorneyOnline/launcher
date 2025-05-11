@@ -24,25 +24,29 @@ qt_add_executable(launcher
   src/webaccess.h src/webaccess.cpp
   src/datatypes.h
   src/launcherui.h src/launcherui.cpp
-  src/launcherqmlinterface.h src/launcherqmlinterface.cpp
 )
 
 qt_add_qml_module(launcher
   URI launcher
+  VERSION 1.0
+  SOURCES
+    src/launcherqmlinterface.h src/launcherqmlinterface.cpp
   QML_FILES
     data/main.qml
     data/settings.qml
 )
-
 target_link_libraries(launcher PRIVATE Qt6::Core Qt6::Qml Qt6::Quick)
+
+target_include_directories(launcher PRIVATE src)
+set_target_properties(launcher PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_LIST_DIR}/bin>
+        RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_LIST_DIR}/bin>)
 
 include(GNUInstallDirs)
 install(TARGETS launcher
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-set_target_properties(launcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 if(WIN32)
   if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -51,7 +55,3 @@ if(WIN32)
     target_sources(launcher PRIVATE ${APP_ICON_RESOURCE_WINDOWS})
   endif()
 endif()
-
-set_target_properties(launcher PROPERTIES
-        LIBRARY_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_LIST_DIR}/bin>
-        RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_LIST_DIR}/bin>)
