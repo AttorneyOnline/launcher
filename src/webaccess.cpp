@@ -5,7 +5,9 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-Launcher::WebAccess::WebAccess(QString f_user_agent, Settings *f_settings, QNetworkAccessManager *f_net_man, QObject *parent)
+using namespace Launcher;
+
+WebAccess::WebAccess(QString f_user_agent, Settings *f_settings, QNetworkAccessManager *f_net_man, QObject *parent)
     : QObject{parent}
     , settings{f_settings}
     , webaccess{f_net_man}
@@ -15,7 +17,7 @@ Launcher::WebAccess::WebAccess(QString f_user_agent, Settings *f_settings, QNetw
   qDebug() << "[CTOR]::MANIFESTFETCHER:USING QNetworkAccessManager at" << webaccess;
 }
 
-void Launcher::WebAccess::fetch(Endpoint document)
+void WebAccess::fetch(Endpoint document)
 {
   QNetworkRequest req;
   req.setHeader(QNetworkRequest::UserAgentHeader, user_agent);
@@ -25,7 +27,7 @@ void Launcher::WebAccess::fetch(Endpoint document)
   connect(reply, &QNetworkReply::finished, this, std::bind(&WebAccess::onReplyReady, this, document, reply));
 }
 
-void Launcher::WebAccess::onReplyReady(Endpoint document, QNetworkReply *reply)
+void WebAccess::onReplyReady(Endpoint document, QNetworkReply *reply)
 {
   QScopedPointer<QNetworkReply> data(reply);
   QNetworkReply::NetworkError error = data->error();
@@ -39,5 +41,5 @@ void Launcher::WebAccess::onReplyReady(Endpoint document, QNetworkReply *reply)
   }
 
   qDebug() << "WEBACCESS::ONREPLYREADY: Received valid response from endpoint" << document;
-  qDebug() << data->readAll();
+  qDebug() << "WEBACCESS::ONREPLYREADY:" << data->readAll();
 }

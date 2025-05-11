@@ -6,9 +6,9 @@
 
 #include <QNetworkAccessManager>
 
-Launcher::LauncherCore::LauncherCore(QNetworkAccessManager *f_net_man, Launcher::Settings *f_settings, QObject *parent)
+Launcher::LauncherCore::LauncherCore(QNetworkAccessManager *f_net_man, Settings *f_settings, QObject *parent)
     : QObject{parent}
-    , webaccess(new Launcher::WebAccess(Launcher::userAgent(), f_settings, f_net_man, this))
+    , webaccess(new WebAccess(Launcher::userAgent(), f_settings, f_net_man, this))
     , settings{f_settings}
 {
   webaccess->fetch(Endpoint::CLIENTVERSION);

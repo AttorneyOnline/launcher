@@ -9,13 +9,13 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Qml Quick)
+
+qt_standard_project_setup(REQUIRES 6.5)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
-
-add_executable(launcher
+qt_add_executable(launcher
   src/main.cpp
   src/version.h
   src/launchercore.h src/launchercore.cpp
@@ -23,8 +23,18 @@ add_executable(launcher
   src/qjsonformat.h
   src/webaccess.h src/webaccess.cpp
   src/datatypes.h
+  src/launcherui.h src/launcherui.cpp
+  src/launcherqmlinterface.h src/launcherqmlinterface.cpp
 )
-target_link_libraries(launcher Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
+
+qt_add_qml_module(launcher
+  URI launcher
+  QML_FILES
+    data/main.qml
+    data/settings.qml
+)
+
+target_link_libraries(launcher PRIVATE Qt6::Core Qt6::Qml Qt6::Quick)
 
 include(GNUInstallDirs)
 install(TARGETS launcher

@@ -5,14 +5,16 @@
 #include <QSettings>
 #include <QtAssert>
 
-Launcher::Settings::Settings(QString f_organisation, QString f_application, QObject *parent)
+using namespace Launcher;
+
+Settings::Settings(QString f_organisation, QString f_application, QObject *parent)
     : QObject{parent}
     , config{new QSettings("config.json", QJsonFormat::JsonFormat, this)}
 {
   qDebug() << "[CTOR]::LAUNCHER::SETTINGS: CREATED OBJECT AT" << this;
 }
 
-const QString Launcher::Settings::getEndpoint(Endpoint endpoint) const
+const QString Settings::getEndpoint(Endpoint endpoint) const
 {
   switch (endpoint)
   {
@@ -31,7 +33,7 @@ const QString Launcher::Settings::getEndpoint(Endpoint endpoint) const
   }
 }
 
-void Launcher::Settings::setEndpoint(Endpoint endpoint, const QString &url)
+void Settings::setEndpoint(Endpoint endpoint, const QString &url)
 {
   switch (endpoint)
   {
