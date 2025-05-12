@@ -24,17 +24,15 @@ qt_add_executable(launcher
   src/webaccess.h src/webaccess.cpp
   src/datatypes.h
   src/launcherui.h src/launcherui.cpp
+  src/launcherqmlinterface.cpp src/launcherqmlinterface.h
 )
 
-qt_add_qml_module(launcher
-  URI launcher
-  VERSION 1.0
-  SOURCES
-    src/launcherqmlinterface.h src/launcherqmlinterface.cpp
-  QML_FILES
+qt_add_resources(launcher "launcher"
+  FILES
     data/main.qml
     data/settings.qml
 )
+
 target_link_libraries(launcher PRIVATE Qt6::Core Qt6::Qml Qt6::Quick)
 
 target_include_directories(launcher PRIVATE src)

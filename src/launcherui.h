@@ -2,6 +2,8 @@
 
 #include <QObject>
 
+class QQmlEngine;
+
 namespace Launcher
 {
   class LauncherUI : public QObject
@@ -10,6 +12,9 @@ namespace Launcher
   public:
     explicit LauncherUI(QObject *parent = nullptr);
 
-  signals:
+  Q_SIGNALS:
+
+  private:
+    QQmlEngine *display_engine;
   };
 } // namespace Launcher

@@ -9,6 +9,7 @@ namespace Launcher
 {
   class Settings;
   class WebAccess;
+  class LauncherUI;
 
   class LauncherCore : public QObject
   {
@@ -20,6 +21,7 @@ namespace Launcher
   private:
     WebAccess *webaccess;
     Settings *settings;
+    LauncherUI *user_interface;
 
     QVersionNumber client_target_version;
     QVersionNumber launcher_target_version;

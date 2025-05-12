@@ -1,4 +1,4 @@
-#include "src/launcherqmlinterface.h"
+#include "launcherqmlinterface.h"
 
 using namespace Launcher;
 

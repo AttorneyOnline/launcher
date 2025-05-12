@@ -1,4 +1,5 @@
 #include "launchercore.h"
+#include "launcherui.h"
 #include "settings.h"
 #include "webaccess.h"
 
@@ -10,6 +11,7 @@ Launcher::LauncherCore::LauncherCore(QNetworkAccessManager *f_net_man, Settings 
     : QObject{parent}
     , webaccess(new WebAccess(Launcher::userAgent(), f_settings, f_net_man, this))
     , settings{f_settings}
+    , user_interface(new LauncherUI(this))
 {
   webaccess->fetch(Endpoint::CLIENTVERSION);
   webaccess->fetch(Endpoint::LAUNCHERVERSION);
