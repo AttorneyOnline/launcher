@@ -41,10 +41,9 @@ jobs:
           cmake --build . --config Release
 
       - name: Deploy Windows
-        working-directory: ${{github.workspace}}/bin/
         shell: bash
         run: |
-          windeployqt --no-translations --no-compiler-runtime --no-opengl-sw -qmldir ${{github.workspace}}/data/  ./launcher.exe
+          windeployqt --no-translations  -qmldir data  bin/launcher.exe
 
       - name: Upload Artifact
         uses: actions/upload-artifact@master
