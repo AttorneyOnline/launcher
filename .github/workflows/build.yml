@@ -18,7 +18,7 @@ jobs:
       with:
         python-version: '3.10'
 
-    - uses: jurplel/install-qt-action@v3
+    - uses: jurplel/install-qt-action@master
       id: qt
       with:
         cache: true
@@ -75,7 +75,7 @@ jobs:
         hdiutil create -volname "AO Launcher" -srcfolder "./launcher.app" -ov -format UDZO "launcher.dmg"
         rm -r ./launcher.app/
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@main
       with:
         name: launcher-macos-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
@@ -90,7 +90,7 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get install -y autoconf automake build-essential cmake git libarchive-dev libssl-dev nettle-dev libmbedtls-dev libacl1-dev libbz2-dev liblzma-dev liblz4-dev libzstd-dev lzop pkg-config zlib1g-dev
 
-    - uses: jurplel/install-qt-action@v3
+    - uses: jurplel/install-qt-action@master
       id: qt
       with:
         cache: true
@@ -123,7 +123,7 @@ jobs:
       run: |
         make
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@main
       with:
         name: launcher-ubuntu-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
@@ -139,7 +139,7 @@ jobs:
       run: |
         "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"
 
-    - uses: jurplel/install-qt-action@v3
+    - uses: jurplel/install-qt-action@master
       id: qt
       with:
         cache: true
@@ -175,7 +175,7 @@ jobs:
       run: |
         nmake      
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@main
       with:
         name: launcher-windows-msvc-${{ github.sha }}
         path: ${{ github.workspace }}/launcher/bin/
