@@ -10,7 +10,7 @@ jobs:
   MacOS:
     runs-on: macos-12
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@main
       with:
         submodules: recursive
 
@@ -83,7 +83,7 @@ jobs:
   Ubuntu:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@main
       with:
         submodules: recursive
 
@@ -131,7 +131,7 @@ jobs:
   Windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@main
       with:
         submodules: recursive
 
